@@ -11,7 +11,7 @@ npm i express-middleware-todb
 
 ## Use
 
-Please visit [this example](./example/readme.js).
+Please visit [the test](./test/index.js).
 
 
 ## Developer guide
