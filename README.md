@@ -1,5 +1,7 @@
 # API starter
 
+[![Continuos integration](https://api.travis-ci.org/IBMResearch/express-middleware-todb.svg)](https://travis-ci.org/IBMResearch/express-middleware-todb)
+
 Express middleware to store requests metadata to a MongoDB instance.
 
 
