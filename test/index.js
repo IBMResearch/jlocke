@@ -45,10 +45,6 @@ MongoClient.connect(url)
       db.collection('requests').find().toArray()
       .then((res) => {
         assert.equal(res.length, 1);
-        assert.deepEqual(Object.keys(res[0]), [
-          '_id', 'path', 'method', 'protocol', 'ip',
-          'headers', 'originalUrl',
-        ]);
         assert.equal(res[0].path, '/');
         assert.equal(res[0].method, 'GET');
         assert.equal(res[0].protocol, 'http');
