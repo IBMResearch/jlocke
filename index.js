@@ -27,15 +27,22 @@ module.exports = (db, opts = {}) =>
       meta.body = req.body;
       dbg('Body found:', req.body);
     }
-    
-    const outCol = opts.col || 'requests'
+
+    // Getting the collection to store the requests info if the proper options is passed.
+    const outCol = opts.col || 'requests';
     // We only need to check for it if the user pass the option. (default: false).
     let getLoc = () => Promise.resolve();
 
-    // if (opts.geo && req.ip) {
+    // Adding geolocation info if the proper options is passed.
     if (opts.geo && req.ip) {
       getLoc = getLocation;
       dbg('The user asked for the location ...');
+    }
+
+    // Adding geolocation info if the proper options is passed.
+    if (opts.idFunc) {
+      meta.userId = opts.idFunc(req);
+      dbg('The user passed a function to get the user ID ...');
     }
 
     getLoc(req.ip)

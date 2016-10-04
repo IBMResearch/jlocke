@@ -12,7 +12,7 @@ const toDb = require('../');
 
 const port = 8888;
 const url = 'mongodb://localhost:27017/requests-monitor';
-const col = 'requests'
+const col = 'requests';
 
 
 console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
@@ -49,12 +49,10 @@ MongoClient.connect(url)
           setTimeout(() => {
             db.collection(col).find().toArray()
             .then((res) => {
-              console.log('RESSSSS');
-              console.log(res);
               assert.equal(res.length, 1);
               assert.deepEqual(Object.keys(res[0]), [
                 '_id', 'path', 'method', 'protocol',
-                'ip', 'headers', 'originalUrl'
+                'ip', 'headers', 'originalUrl',
               ]);
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
