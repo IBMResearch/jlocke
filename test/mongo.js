@@ -15,7 +15,7 @@ const port = 9999;
 const url = 'mongodb://localhost:27017/requests-monitor';
 const col = 'requests2';
 
-const idFunc = req => req.session.id;
+const idFunc = req => Promise.resolve(req.session.id);
 
 
 console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
@@ -23,7 +23,7 @@ MongoClient.connect(url)
 .then((db) => {
   console.log('Correctly connected to the DB'); // eslint-disable-line no-console
 
-  test('with options', (assert) => {
+  test('with options (MongoDB)', (assert) => {
     assert.plan(13);
 
     const app = express();
@@ -35,6 +35,7 @@ MongoClient.connect(url)
       saveUninitialized: true,
       cookie: { secure: true },
     }));
+
     // The middleware needs an alive DB connection.
     app.use(toDb(db, { geo: true, col, idFunc }));
 
@@ -59,6 +60,8 @@ MongoClient.connect(url)
           setTimeout(() => {
             db.collection(col).find().toArray()
             .then((res) => {
+              console.log('RESSSSS');
+              console.log(res);
               assert.equal(res.length, 1);
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
