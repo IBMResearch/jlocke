@@ -30,9 +30,9 @@ module.exports = (db, opts = {}) =>
 
     // Getting the collection to store the requests info if the proper options is passed.
     const outCol = opts.col || 'requests';
+
     // We only need to check for it if the user pass the option. (default: false).
     let getLoc = () => Promise.resolve();
-
     // Adding geolocation info if the proper options is passed.
     if (opts.geo && req.ip) {
       getLoc = getLocation;

@@ -13,7 +13,12 @@ npm i express-middleware-todb
 
 ## Use
 
-Please visit [the test](./test/index.js).
+The middleware expects to receive the next parameters. Please visit [the tests](./tests) for more details.
+- `db` (object) - MongoDB connected instance.
+- `opts` is an object with the optional ones:
+ - `col` (string) - Name of the collection to store the requests info. (default: 'requests')
+ - `geo` (boolean) - To make an extra request to get also the request IP address location. (default: false)
+ - `idFunc(req)` (function) - Function to add also the user ID with the request info. It should receive a `request` parameter (A Express common ["request"](http://expressjs.com/es/4x/api.html#req) object). (default: not used)
 
 
 ## Developer guide
