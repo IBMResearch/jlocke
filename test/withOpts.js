@@ -3,6 +3,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const test = require('tap').test;
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
@@ -14,18 +15,28 @@ const port = 9999;
 const url = 'mongodb://localhost:27017/requests-monitor';
 const col = 'requests2';
 
+const idFunc = req => req.session.id;
+
+
 console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
 MongoClient.connect(url)
 .then((db) => {
   console.log('Correctly connected to the DB'); // eslint-disable-line no-console
 
   test('with options', (assert) => {
-    assert.plan(11);
+    assert.plan(13);
 
     const app = express();
     app.use(bodyParser.json());
+
+    app.use(session({
+      secret: 'keyboard cat',
+      resave: false,
+      saveUninitialized: true,
+      cookie: { secure: true },
+    }));
     // The middleware needs an alive DB connection.
-    app.use(toDb(db, { geo: true, col }));
+    app.use(toDb(db, { geo: true, col, idFunc }));
 
     // Routes should be defined after the middlewares.
     app.get('/', (req, res) => { res.send('Hello World!'); });
@@ -62,6 +73,8 @@ MongoClient.connect(url)
                 'region_name', 'city', 'zip_code', 'time_zone',
                 'latitude', 'longitude', 'metro_code',
               ]);
+              assert.type(res[0].userId, 'string');
+              assert.equal(res[0].userId.length, 32);
 
               // We need to close to allow the test keep passing.
               db.close()
