@@ -2,7 +2,7 @@
 
 [![Continuos integration](https://api.travis-ci.org/IBMResearch/express-middleware-todb.svg)](https://travis-ci.org/IBMResearch/express-middleware-todb)
 
-Express middleware to store requests metadata to a MongoDB instance.
+Express middleware to store requests metadata to a DB. For now we support [MongoDB](https://www.mongodb.com/) and [Elastic](https://www.elastic.co/).
 
 
 ## Install
@@ -14,11 +14,11 @@ npm i express-middleware-todb
 ## Use
 
 The middleware expects to receive the next parameters. Please visit [the tests](./tests) for more details.
-- `db` (object) - MongoDB connected instance.
+- `db` (object) - MongoDB or Elastic connected instance.
 - `opts` is an object with the optional ones:
  - `col` (string) - Name of the collection to store the requests info. (default: 'requests')
  - `geo` (boolean) - To make an extra request to get also the request IP address location. (default: false)
- - `idFunc(req)` (function) - Function to add also the user ID with the request info. It should receive a `request` parameter (A Express common ["request"](http://expressjs.com/es/4x/api.html#req) object). (default: not used)
+ - `idFunc(req, app)` (function) - Function to add also the user ID with the request info. It should receive: an Express ["request"](http://expressjs.com/es/4x/api.html#req) and ["application"](http://expressjs.com/es/4x/api.html#app) objects (the second one is optional). (default: not used)
 
 
 ## Developer guide
