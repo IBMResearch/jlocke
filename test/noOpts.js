@@ -20,7 +20,7 @@ MongoClient.connect(url)
 .then((db) => {
   console.log('Correctly connected to the DB'); // eslint-disable-line no-console
 
-  test('with options', (assert) => {
+  test('with no options', (assert) => {
     assert.plan(10);
 
     const app = express();
