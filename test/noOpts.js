@@ -12,16 +12,18 @@ const toDb = require('../');
 
 const port = 8888;
 const url = 'mongodb://localhost:27017/requests-monitor';
+// The default one because we're not passing anyone.
 const col = 'requests';
 
 
+// TODO: Change this console.log for debugs!
 console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
 MongoClient.connect(url)
 .then((db) => {
   console.log('Correctly connected to the DB'); // eslint-disable-line no-console
 
   test('with no options', (assert) => {
-    assert.plan(10);
+    assert.plan(11);
 
     const app = express();
     app.use(bodyParser.json());
@@ -29,7 +31,7 @@ MongoClient.connect(url)
     app.use(toDb(db));
 
     // Routes should be defined after the middlewares.
-    app.get('/', (req, res) => { res.send('Hello World!'); });
+    app.get('/', (req, res) => res.send('Hello World!'));
 
     // So we need it ready before starting the app to avoid losing initial requests data.
     const server = app.listen(port, () => {
@@ -52,7 +54,7 @@ MongoClient.connect(url)
               assert.equal(res.length, 1);
               assert.deepEqual(Object.keys(res[0]), [
                 '_id', 'path', 'method', 'protocol',
-                'ip', 'headers', 'originalUrl',
+                'ip', 'headers', 'originalUrl', 'responseCode',
               ]);
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
@@ -61,6 +63,7 @@ MongoClient.connect(url)
               assert.equal(res[0].headers.host, '127.0.0.1:8888');
               assert.equal(res[0].headers.connection, 'close');
               assert.equal(res[0].originalUrl, '/');
+              assert.equal(res[0].responseCode, 200);
 
               // We need to close to allow the test keep passing.
               db.close()

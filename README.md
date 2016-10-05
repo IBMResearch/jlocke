@@ -1,4 +1,4 @@
-# API starter
+# express-middleware-todb
 
 [![Continuos integration](https://api.travis-ci.org/IBMResearch/express-middleware-todb.svg)](https://travis-ci.org/IBMResearch/express-middleware-todb)
 
@@ -6,6 +6,7 @@ Express middleware to store requests metadata to a DB. For now we support [Mongo
 
 
 ## Install
+
 ```sh
 npm i express-middleware-todb
 ```
@@ -14,11 +15,20 @@ npm i express-middleware-todb
 ## Use
 
 The middleware expects to receive the next parameters. Please visit [the tests](./tests) for more details.
-- `db` (object) - MongoDB or Elastic connected instance.
+- `db` (object) - MongoDB instance or Elastic client.
 - `opts` is an object with the optional ones:
- - `col` (string) - Name of the collection to store the requests info. (default: 'requests')
  - `geo` (boolean) - To make an extra request to get also the request IP address location. (default: false)
- - `idFunc(req, app)` (function) - Function to add also the user ID with the request info. It should receive: an Express ["request"](http://expressjs.com/es/4x/api.html#req) and ["application"](http://expressjs.com/es/4x/api.html#app) objects (the second one is optional). (default: not used)
+ - `idFunc(req, res)` (function) - Promise to add also the user ID with the request info. It's going to receive the Express ["Request"](http://expressjs.com/es/4x/api.html#req) and ["Response"](http://expressjs.com/es/4x/api.html#res) objects. So you can use them inside. (default: not used)
+ - `dbOpts` (object) - Specific DB options.
+
+About the `dbOpts` object:
+- `type` (string) - Type of the database ("mongo" or "elastic"). (default: "mongo")
+The rest depend of the selected type:
+- MongoDB:
+ - `colName` (string) - Name of the "collection" to store the requests info. The "index" in the case of Elastic (default: 'requests')
+- Elastic:
+ - `indexName` (string) - Name of the "index" to store the requests info. (default: 'searchByRequest')
+ - `elasType` (string) - Type of the element to store the requests info. (default: 'requests')
 
 
 ## Developer guide

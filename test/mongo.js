@@ -13,7 +13,7 @@ const toDb = require('../');
 
 const port = 9999;
 const url = 'mongodb://localhost:27017/requests-monitor';
-const col = 'requests2';
+const colName = 'requests2';
 
 const idFunc = req => Promise.resolve(req.session.id);
 
@@ -24,7 +24,7 @@ MongoClient.connect(url)
   console.log('Correctly connected to the DB'); // eslint-disable-line no-console
 
   test('with options (MongoDB)', (assert) => {
-    assert.plan(13);
+    assert.plan(14);
 
     const app = express();
     app.use(bodyParser.json());
@@ -37,10 +37,10 @@ MongoClient.connect(url)
     }));
 
     // The middleware needs an alive DB connection.
-    app.use(toDb(db, { geo: true, col, idFunc }));
+    app.use(toDb(db, { geo: true, idFunc, dbOpts: { colName } }));
 
     // Routes should be defined after the middlewares.
-    app.get('/', (req, res) => { res.send('Hello World!'); });
+    app.get('/', (req, res) => res.send('Hello World!'));
 
     // So we need it ready before starting the app to avoid losing initial requests data.
     const server = app.listen(port, () => {
@@ -48,7 +48,7 @@ MongoClient.connect(url)
       console.log(`Example app listening on port: ${port}`);
 
       // When we run the tests locally we may have older ones.
-      db.collection(col).removeMany()
+      db.collection(colName).removeMany()
       .then(() => {
         makeReq(`http://127.0.0.1:${port}`)
         .then((httpRes) => {
@@ -58,10 +58,8 @@ MongoClient.connect(url)
           // to wait for these operation to answer more HTTP requests. So we have to
           // wait a bit here to let it finish.
           setTimeout(() => {
-            db.collection(col).find().toArray()
+            db.collection(colName).find().toArray()
             .then((res) => {
-              console.log('RESSSSS');
-              console.log(res);
               assert.equal(res.length, 1);
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
@@ -70,6 +68,7 @@ MongoClient.connect(url)
               assert.equal(res[0].headers.host, '127.0.0.1:9999');
               assert.equal(res[0].headers.connection, 'close');
               assert.equal(res[0].originalUrl, '/');
+              assert.equal(res[0].responseCode, 200);
               assert.equal(res[0].geo.ip, '127.0.0.1');
               assert.deepEqual(Object.keys(res[0].geo), [
                 'ip', 'country_code', 'country_name', 'region_code',
