@@ -49,7 +49,6 @@ const elasType = 'requests3';
 dbg(`Starting, connecting to the DB: ${url}`);
 const db = new elastic.Client({
   host: url,
-  // plugins: [deleteByQuery],
   // log: 'trace',
 });
 deleteByQuery(db);
