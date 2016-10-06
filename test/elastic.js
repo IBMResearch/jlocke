@@ -56,7 +56,7 @@ const deleteByQueryP = Promise.promisify(db.deleteByQuery);
 
 
 test('with DB options (Elastic)', (assert) => {
-  assert.plan(21);
+  assert.plan(22);
 
   const app = express();
   app.use(bodyParser.json());
@@ -112,7 +112,8 @@ test('with DB options (Elastic)', (assert) => {
                 assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
                 assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
                 assert.equal(body.hits.hits[0]._source.originalUrl, '/');
-                assert.type(body.hits.hits[0]._source.timestamp, 'object');
+                // Elastic returns it as an string.
+                assert.type(body.hits.hits[0]._source.timestamp, 'string');
                 assert.equal(body.hits.hits[0]._source.responseCode, 200);
                 assert.equal(body.hits.hits[0]._source.geo.ip, '127.0.0.1');
                 assert.deepEqual(Object.keys(body.hits.hits[0]._source.geo), [

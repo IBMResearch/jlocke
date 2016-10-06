@@ -51,7 +51,7 @@ MongoClient.connect(url)
   dbg('Correctly connected to the DB');
 
   test('with options (MongoDB)', (assert) => {
-    assert.plan(14);
+    assert.plan(15);
 
     const app = express();
     app.use(bodyParser.json());
