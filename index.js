@@ -39,7 +39,7 @@ module.exports = (db, opts = { dbOpts: {} }) => {
   // Specific for MongoDB
   const mongoCol = opts.dbOpts.colName || 'requests';
   // Elastic
-  const elasIndex = opts.dbOpts.indexName || 'searchByRequest';
+  const elasIndex = opts.dbOpts.indexName || 'searchbyrequest';
   const elasType = opts.dbOpts.elasType || 'requests';
 
   // To be sure that the proper indexes exist.
