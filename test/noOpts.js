@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
+const dbg = require('debug')('express-middleware-todb:test:noOpts');
 
 const toDb = require('../');
 
@@ -16,11 +17,10 @@ const url = 'mongodb://localhost:27017/requests-monitor';
 const col = 'requests';
 
 
-// TODO: Change this console.log for debugs!
-console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
+dbg(`Starting, connecting to the DB: ${url}`);
 MongoClient.connect(url)
 .then((db) => {
-  console.log('Correctly connected to the DB'); // eslint-disable-line no-console
+  dbg('Correctly connected to the DB');
 
   test('with no options', (assert) => {
     assert.plan(11);
@@ -35,8 +35,7 @@ MongoClient.connect(url)
 
     // So we need it ready before starting the app to avoid losing initial requests data.
     const server = app.listen(port, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Example app listening on port: ${port}`);
+      dbg(`Example app listening on port: ${port}`);
 
       // When we run the tests locally we may have older ones.
       db.collection(col).removeMany()

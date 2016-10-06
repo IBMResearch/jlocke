@@ -10,6 +10,7 @@ const elastic = require('elasticsearch');
 const deleteByQuery = require('elastic-deletebyquery');
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
+const dbg = require('debug')('express-middleware-todb:test:elastic');
 
 const toDb = require('../');
 
@@ -19,7 +20,7 @@ const indexName = 'test1';
 const elasType = 'requests3';
 
 
-console.log(`Starting, connecting to the DB: ${url}`); // eslint-disable-line no-console
+dbg(`Starting, connecting to the DB: ${url}`);
 const db = new elastic.Client({
   host: url,
   // plugins: [deleteByQuery],
@@ -43,8 +44,7 @@ test('with DB options (Elastic)', (assert) => {
 
   // So we need it ready before starting the app to avoid losing initial requests data.
   const server = app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Example app listening on port: ${port}`);
+    dbg(`Example app listening on port: ${port}`);
 
     // To drop the old ones (from old test runs).
     deleteByQueryP({ index: indexName, type: elasType })
