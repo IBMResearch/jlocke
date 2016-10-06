@@ -6,4 +6,7 @@ sudo: false
 
 services:
   - mongodb
-  - elastic
+  - elasticsearch
+
+before_script:
+  - sleep 10
