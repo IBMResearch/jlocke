@@ -50,7 +50,7 @@ MongoClient.connect(url)
   dbg('Correctly connected to the DB');
 
   test('with no options', (assert) => {
-    assert.plan(11);
+    assert.plan(12);
 
     const app = express();
     app.use(bodyParser.json());
@@ -82,7 +82,7 @@ MongoClient.connect(url)
               // TODO: Because of any reason this one is failing in Travis but not locally.
               // assert.deepEqual(Object.keys(res[0]), [
               //   '_id', 'path', 'method', 'protocol',
-              //   'ip', 'headers', 'originalUrl', 'responseCode',
+              //   'ip', 'headers', 'originalUrl', 'timestamp', 'responseCode',
               // ]);
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
@@ -92,6 +92,7 @@ MongoClient.connect(url)
               assert.equal(res[0].headers.connection, 'close');
               assert.equal(res[0].headers['user-agent'], userAgent);
               assert.equal(res[0].originalUrl, '/');
+              assert.type(res[0].timestamp, 'object');
               assert.equal(res[0].responseCode, 200);
 
               // We need to close to allow the test keep passing.

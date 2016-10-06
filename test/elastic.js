@@ -112,6 +112,7 @@ test('with DB options (Elastic)', (assert) => {
                 assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
                 assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
                 assert.equal(body.hits.hits[0]._source.originalUrl, '/');
+                assert.type(body.hits.hits[0]._source.timestamp, 'object');
                 assert.equal(body.hits.hits[0]._source.responseCode, 200);
                 assert.equal(body.hits.hits[0]._source.geo.ip, '127.0.0.1');
                 assert.deepEqual(Object.keys(body.hits.hits[0]._source.geo), [

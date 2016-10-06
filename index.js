@@ -66,6 +66,7 @@ module.exports = (db, opts = { dbOpts: {} }) => {
       headers: req.headers,
       originalUrl: req.originalUrl,
       responseCode: res.statusCode,
+      timestamp: new Date(),
     };
     if (Object.keys(req.params).length > 0) {
       meta.params = req.param;

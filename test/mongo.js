@@ -94,6 +94,7 @@ MongoClient.connect(url)
               assert.equal(res[0].headers.host, '127.0.0.1:9999');
               assert.equal(res[0].headers.connection, 'close');
               assert.equal(res[0].originalUrl, '/');
+              assert.type(res[0].timestamp, 'object');
               assert.equal(res[0].responseCode, 200);
               assert.equal(res[0].geo.ip, '127.0.0.1');
               assert.deepEqual(Object.keys(res[0].geo), [
