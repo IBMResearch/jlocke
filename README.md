@@ -9,7 +9,7 @@ Express middleware to store requests metadata to a DB. For now we support [Mongo
 ## Install
 
 ```sh
-npm i express-middleware-todb
+npm i --save express-middleware-todb
 ```
 
 
