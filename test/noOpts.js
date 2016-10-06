@@ -15,6 +15,7 @@ const port = 8888;
 const url = 'mongodb://localhost:27017/requests-monitor';
 // The default one because we're not passing anyone.
 const col = 'requests';
+const userAgent = 'testAgent';
 
 
 dbg(`Starting, connecting to the DB: ${url}`);
@@ -23,7 +24,7 @@ MongoClient.connect(url)
   dbg('Correctly connected to the DB');
 
   test('with no options', (assert) => {
-    assert.plan(10);
+    assert.plan(11);
 
     const app = express();
     app.use(bodyParser.json());
@@ -40,7 +41,8 @@ MongoClient.connect(url)
       // When we run the tests locally we may have older ones.
       db.collection(col).removeMany()
       .then(() => {
-        makeReq(`http://127.0.0.1:${port}`)
+        // To check at least for one header in one test.
+        makeReq(`http://127.0.0.1:${port}`, { headers: { 'User-Agent': userAgent } })
         .then((httpRes) => {
           assert.equal(httpRes[1], 'Hello World!');
 
@@ -62,6 +64,7 @@ MongoClient.connect(url)
               assert.equal(res[0].ip, '::ffff:127.0.0.1');
               assert.equal(res[0].headers.host, '127.0.0.1:8888');
               assert.equal(res[0].headers.connection, 'close');
+              assert.equal(res[0].headers['user-agent'], userAgent);
               assert.equal(res[0].originalUrl, '/');
               assert.equal(res[0].responseCode, 200);
 
