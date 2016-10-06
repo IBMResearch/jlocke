@@ -1,6 +1,7 @@
 # express-middleware-todb
 
 [![Continuos integration](https://api.travis-ci.org/IBMResearch/express-middleware-todb.svg)](https://travis-ci.org/IBMResearch/express-middleware-todb)
+[![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880)
 
 Express middleware to store requests metadata to a DB. For now we support [MongoDB](https://www.mongodb.com/) and [Elastic](https://www.elastic.co/).
 
