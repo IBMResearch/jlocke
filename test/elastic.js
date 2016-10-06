@@ -46,59 +46,66 @@ test('with DB options (Elastic)', (assert) => {
   const server = app.listen(port, () => {
     dbg(`Example app listening on port: ${port}`);
 
-    // To drop the old ones (from old test runs).
-    deleteByQueryP({ index: indexName, type: elasType })
-    .then(() => {
-      makeReq(`http://127.0.0.1:${port}`)
-      .then((httpRes) => {
-        assert.equal(httpRes[1], 'Hello World!');
+    db.indices.exists({ index: indexName })
+    .then((exists) => {
+      let deleteIndex = Promise.resolve();
+      if (exists) { deleteIndex = deleteByQueryP({ index: indexName, type: elasType }); }
 
-        // The middleware write to the DB in async to avoid force the server
-        // to wait for these operation to answer more HTTP requests. So we have to
-        // wait a bit here to let it finish.
-        setTimeout(() => {
-          db.search({
-            index: indexName,
-            type: elasType,
-          })
-          .then(
-            (body) => {
-              assert.deepEqual(Object.keys(body), ['took', 'timed_out', '_shards', 'hits']);
-              // Only cheking some of them to KISS.
-              assert.equal(body.timed_out, false);
-              assert.equal(body.hits.total, 1);
-              assert.equal(body.hits.max_score, 1);
-              assert.equal(body.hits.hits.length, 1);
-              /* eslint-disable no-underscore-dangle */
-              assert.equal(body.hits.hits[0]._index, indexName);
-              assert.equal(body.hits.hits[0]._type, elasType);
-              assert.type(body.hits.hits[0]._id, 'string');
-              assert.equal(body.hits.hits[0]._id.length, 20);
-              assert.equal(body.hits.hits[0]._score, 1);
-              assert.equal(body.hits.hits[0]._source.path, '/');
-              assert.equal(body.hits.hits[0]._source.method, 'GET');
-              assert.equal(body.hits.hits[0]._source.protocol, 'http');
-              assert.equal(body.hits.hits[0]._source.ip, '::ffff:127.0.0.1');
-              assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
-              assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
-              assert.equal(body.hits.hits[0]._source.originalUrl, '/');
-              assert.equal(body.hits.hits[0]._source.responseCode, 200);
-              assert.equal(body.hits.hits[0]._source.geo.ip, '127.0.0.1');
-              assert.deepEqual(Object.keys(body.hits.hits[0]._source.geo), [
-                'ip', 'country_code', 'country_name', 'region_code',
-                'region_name', 'city', 'zip_code', 'time_zone',
-                'latitude', 'longitude', 'metro_code',
-              ]);
-              /* eslint-enable no-underscore-dangle */
+      // To drop the old ones (from old test runs).
+      deleteIndex
+      .then(() => {
+        makeReq(`http://127.0.0.1:${port}`)
+        .then((httpRes) => {
+          assert.equal(httpRes[1], 'Hello World!');
 
-              // We need to close to allow the test keep passing.
-              server.close();
-            },
-            err => assert.fail(`Getting the requests: ${err.message}`)
-          );
-        }, 3000);
+          // The middleware write to the DB in async to avoid force the server
+          // to wait for these operation to answer more HTTP requests. So we have to
+          // wait a bit here to let it finish.
+          setTimeout(() => {
+            db.search({
+              index: indexName,
+              type: elasType,
+            })
+            .then(
+              (body) => {
+                assert.deepEqual(Object.keys(body), ['took', 'timed_out', '_shards', 'hits']);
+                // Only cheking some of them to KISS.
+                assert.equal(body.timed_out, false);
+                assert.equal(body.hits.total, 1);
+                assert.equal(body.hits.max_score, 1);
+                assert.equal(body.hits.hits.length, 1);
+                /* eslint-disable no-underscore-dangle */
+                assert.equal(body.hits.hits[0]._index, indexName);
+                assert.equal(body.hits.hits[0]._type, elasType);
+                assert.type(body.hits.hits[0]._id, 'string');
+                assert.equal(body.hits.hits[0]._id.length, 20);
+                assert.equal(body.hits.hits[0]._score, 1);
+                assert.equal(body.hits.hits[0]._source.path, '/');
+                assert.equal(body.hits.hits[0]._source.method, 'GET');
+                assert.equal(body.hits.hits[0]._source.protocol, 'http');
+                assert.equal(body.hits.hits[0]._source.ip, '::ffff:127.0.0.1');
+                assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
+                assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
+                assert.equal(body.hits.hits[0]._source.originalUrl, '/');
+                assert.equal(body.hits.hits[0]._source.responseCode, 200);
+                assert.equal(body.hits.hits[0]._source.geo.ip, '127.0.0.1');
+                assert.deepEqual(Object.keys(body.hits.hits[0]._source.geo), [
+                  'ip', 'country_code', 'country_name', 'region_code',
+                  'region_name', 'city', 'zip_code', 'time_zone',
+                  'latitude', 'longitude', 'metro_code',
+                ]);
+                /* eslint-enable no-underscore-dangle */
+
+                // We need to close to allow the test keep passing.
+                server.close();
+              },
+              err => assert.fail(`Getting the requests: ${err.message}`)
+            );
+          }, 3000);
+        })
+        .catch(err => assert.fail(`Making the request: ${err.message}`));
       })
-      .catch(err => assert.fail(`Making the request: ${err.message}`));
+      .catch(err => assert.fail(`Checking the actual indexes: ${err.message}`));
     })
     .catch(err => assert.fail(`Dropping the old requests: ${err.message}`));
   });
