@@ -110,11 +110,12 @@ module.exports = (db, opts = { dbOpts: {} }) => {
         if (opts.dbOpts && opts.dbOpts.type === 'elastic') {
           // Formating geo data for Elastic. The field name "location" is mandatory:
           // https://www.elastic.co/guide/en/elasticsearch/guide/current/lat-lon-formats.html
+
           if (meta.geo &&
             // "longitude" and "latitude" can be 0.
             (meta.geo.longitude || meta.geo.longitude === 0) &&
             (meta.geo.latitude || meta.geo.latitude === 0)) {
-            meta.location = { lon: meta.geo.longitude, lat: meta.geo.latitude };
+            meta.location = [meta.geo.longitude, meta.geo.latitude];
           }
 
           op = db.index({
@@ -125,7 +126,9 @@ module.exports = (db, opts = { dbOpts: {} }) => {
         } else {
           // Formating geo data for MongoDB.
           // https://docs.mongodb.com/manual/core/2dsphere/
-          if (meta.geo && meta.geo.longitude && meta.geo.latitude) {
+          if (meta.geo &&
+            (meta.geo.longitude || meta.geo.longitude === 0) &&
+            (meta.geo.latitude || meta.geo.latitude === 0)) {
             meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
           }
 

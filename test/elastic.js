@@ -56,7 +56,7 @@ const deleteByQueryP = Promise.promisify(db.deleteByQuery);
 
 
 test('with DB options (Elastic)', (assert) => {
-  assert.plan(22);
+  assert.plan(23);
 
   const app = express();
   app.use(bodyParser.json());
@@ -121,6 +121,8 @@ test('with DB options (Elastic)', (assert) => {
                   'region_name', 'city', 'zip_code', 'time_zone',
                   'latitude', 'longitude', 'metro_code',
                 ]);
+                assert.deepEqual(body.hits.hits[0]._source.location, [0, 0]);
+
                 /* eslint-enable no-underscore-dangle */
 
                 // We need to close to allow the test keep passing.

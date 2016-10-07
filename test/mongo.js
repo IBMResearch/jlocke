@@ -51,7 +51,7 @@ MongoClient.connect(url)
   dbg('Correctly connected to the DB');
 
   test('with options (MongoDB)', (assert) => {
-    assert.plan(15);
+    assert.plan(17);
 
     const app = express();
     app.use(bodyParser.json());
@@ -64,7 +64,12 @@ MongoClient.connect(url)
     }));
 
     // The middleware needs an alive DB connection.
-    app.use(toDb(db, { geo: true, idFunc, dbOpts: { colName } }));
+    app.use(toDb(db, {
+      geo: true,
+      idFunc,
+      omitBody: ['login', 'password'],
+      dbOpts: { colName },
+    }));
 
     // Routes should be defined after the middlewares.
     app.get('/', (req, res) => res.send('Hello World!'));
@@ -102,6 +107,8 @@ MongoClient.connect(url)
                 'region_name', 'city', 'zip_code', 'time_zone',
                 'latitude', 'longitude', 'metro_code',
               ]);
+              assert.equal(res[0].location.type, 'Point');
+              assert.deepEqual(res[0].location.coordinates, [0, 0]);
               assert.type(res[0].userId, 'string');
               assert.equal(res[0].userId.length, 32);
 
