@@ -65,7 +65,6 @@ module.exports = (db, opts = { dbOpts: {} }) => {
       ip: req.ip,
       headers: req.headers,
       originalUrl: req.originalUrl,
-      responseCode: res.statusCode,
       timestamp: new Date(),
     };
     if (Object.keys(req.params).length > 0) {
@@ -80,6 +79,8 @@ module.exports = (db, opts = { dbOpts: {} }) => {
     // We need to wait for the route to finish to get the correct statusCode.
     res.on('finish', () => {
       dbg('Request ended');
+
+      meta.responseCode = res.statusCode;
 
       // Adding geolocation info if the proper options is passed.
       // We only need to check for it if the user pass the option. (default: false).
