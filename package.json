@@ -45,7 +45,6 @@
   "devDependencies": {
     "body-parser": "^1.15.2",
     "depcheck": "^0.6.4",
-    "elastic-deletebyquery": "^1.0.7",
     "eslint": "^3.6.0",
     "eslint-config-airbnb-base": "^8.0.0",
     "eslint-plugin-html": "^1.5.3",

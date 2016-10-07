@@ -32,8 +32,6 @@ const test = require('tap').test;
 const express = require('express');
 const bodyParser = require('body-parser');
 const elastic = require('elasticsearch');
-// Not supported in the core on last versions.
-const deleteByQuery = require('elastic-deletebyquery');
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
 const dbg = require('debug')('express-middleware-todb:test:elastic');
@@ -51,12 +49,10 @@ const db = new elastic.Client({
   host: url,
   // log: 'trace',
 });
-deleteByQuery(db);
-const deleteByQueryP = Promise.promisify(db.deleteByQuery);
 
 
 test('with DB options (Elastic)', (assert) => {
-  assert.plan(23);
+  assert.plan(24);
 
   const app = express();
   app.use(bodyParser.json());
@@ -74,7 +70,8 @@ test('with DB options (Elastic)', (assert) => {
     db.indices.exists({ index: indexName })
     .then((exists) => {
       let deleteIndex = Promise.resolve();
-      if (exists) { deleteIndex = deleteByQueryP({ index: indexName, type: elasType }); }
+      // if (exists) { deleteIndex = deleteByQueryP({ index: indexName, type: elasType }); }
+      if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
 
       // To drop the old ones (from old test runs).
       deleteIndex
@@ -121,7 +118,8 @@ test('with DB options (Elastic)', (assert) => {
                   'region_name', 'city', 'zip_code', 'time_zone',
                   'latitude', 'longitude', 'metro_code',
                 ]);
-                assert.deepEqual(body.hits.hits[0]._source.location, [0, 0]);
+                assert.deepEqual(body.hits.hits[0]._source.location.lon, 0);
+                assert.deepEqual(body.hits.hits[0]._source.location.lat, 0);
 
                 /* eslint-enable no-underscore-dangle */
 

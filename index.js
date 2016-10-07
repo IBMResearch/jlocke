@@ -115,7 +115,7 @@ module.exports = (db, opts = { dbOpts: {} }) => {
             // "longitude" and "latitude" can be 0.
             (meta.geo.longitude || meta.geo.longitude === 0) &&
             (meta.geo.latitude || meta.geo.latitude === 0)) {
-            meta.location = [meta.geo.longitude, meta.geo.latitude];
+            meta.location = { lon: meta.geo.longitude, lat: meta.geo.latitude };
           }
 
           op = db.index({
