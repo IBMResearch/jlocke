@@ -9,4 +9,4 @@ services:
   - elasticsearch
 
 before_script:
-  - sleep 10
+  - sleep 15
