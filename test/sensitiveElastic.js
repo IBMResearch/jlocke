@@ -21,10 +21,13 @@ const dbg = require('debug')('express-middleware-todb:test:elastic');
 
 const toDb = require('../');
 
-const port = 7777;
+const port = 4444;
 const url = 'localhost:9200';
-const indexName = 'test1';
-const elasType = 'requests3';
+const indexName = 'searchbyrequest';
+const elasType = 'requests';
+const excludePath = 'login';
+const excludeField = 'password';
+const badLoginMsg = 'login failed';
 
 
 dbg(`Starting, connecting to the DB: ${url}`);
@@ -35,16 +38,26 @@ const db = new elastic.Client({
 
 
 test('with DB options (Elastic)', (assert) => {
-  assert.plan(24);
+  assert.plan(22);
 
   const app = express();
   app.use(bodyParser.json());
 
   // The middleware needs an alive DB connection.
-  app.use(toDb(db, { geo: true, dbOpts: { type: 'elastic', indexName, elasType } }));
+  app.use(toDb(db, {
+    hide: { path: excludePath, field: excludeField },
+    dbOpts: { type: 'elastic' },
+  }));
 
   // Routes should be defined after the middlewares.
   app.get('/', (req, res) => res.send('Hello World!'));
+  app.post('/login', (req, res) => {
+    if (req.body.username === 'ola') {
+      res.send({ username: 'test', token: 'aaa' });
+    } else {
+      res.status(401).send(badLoginMsg);
+    }
+  });
 
   // So we need it ready before starting the app to avoid losing initial requests data.
   const server = app.listen(port, () => {
@@ -58,9 +71,14 @@ test('with DB options (Elastic)', (assert) => {
       // To drop the old ones (from old test runs).
       deleteIndex
       .then(() => {
-        makeReq(`http://127.0.0.1:${port}`)
+        const reqOpts = {
+          url: `http://127.0.0.1:${port}/login`,
+          method: 'POST',
+          json: { username: 'ola', password: 'kase' },
+        };
+        makeReq(reqOpts)
         .then((httpRes) => {
-          assert.equal(httpRes[1], 'Hello World!');
+          assert.equal(httpRes[0].statusCode, 200);
 
           // The middleware write to the DB in async to avoid force the server
           // to wait for these operation to answer more HTTP requests. So we have to
@@ -84,25 +102,18 @@ test('with DB options (Elastic)', (assert) => {
                 assert.type(body.hits.hits[0]._id, 'string');
                 assert.equal(body.hits.hits[0]._id.length, 20);
                 assert.equal(body.hits.hits[0]._score, 1);
-                assert.equal(body.hits.hits[0]._source.path, '/');
-                assert.equal(body.hits.hits[0]._source.method, 'GET');
+                assert.equal(body.hits.hits[0]._source.path, '/login');
+                assert.equal(body.hits.hits[0]._source.method, 'POST');
                 assert.equal(body.hits.hits[0]._source.protocol, 'http');
                 assert.equal(body.hits.hits[0]._source.ip, '::ffff:127.0.0.1');
-                assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
+                assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:4444');
                 assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
-                assert.equal(body.hits.hits[0]._source.originalUrl, '/');
+                assert.equal(body.hits.hits[0]._source.originalUrl, '/login');
                 // Elastic returns it as an string.
                 assert.type(body.hits.hits[0]._source.timestamp, 'string');
                 assert.equal(body.hits.hits[0]._source.responseCode, 200);
-                assert.equal(body.hits.hits[0]._source.geo.ip, '127.0.0.1');
-                assert.deepEqual(Object.keys(body.hits.hits[0]._source.geo), [
-                  'ip', 'country_code', 'country_name', 'region_code',
-                  'region_name', 'city', 'zip_code', 'time_zone',
-                  'latitude', 'longitude', 'metro_code',
-                ]);
-                assert.deepEqual(body.hits.hits[0]._source.location.lon, 0);
-                assert.deepEqual(body.hits.hits[0]._source.location.lat, 0);
-
+                assert.equal(body.hits.hits[0]._source.body.username, 'ola');
+                assert.equal(body.hits.hits[0]._source.body[excludeField], undefined);
                 /* eslint-enable no-underscore-dangle */
 
                 // We need to close to allow the test keep passing.

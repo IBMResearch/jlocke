@@ -89,6 +89,13 @@ module.exports = (db, opts = { dbOpts: {} }) => {
         if (result[1]) { meta.geo = result[1]; }
         dbg('Inserting found request metadata in the DB', meta);
 
+        if (meta.method === 'POST' &&
+            opts.hide && opts.hide.path &&
+           (meta.path.indexOf(opts.hide.path) !== -1) &&
+           opts.hide.field && meta.body[opts.hide.field]) {
+          delete meta.body[opts.hide.field];
+        }
+
         let op;
         // MongoDB is the default option.
         // Checking that it's not a MongoDB instance -> should be Elastic.
@@ -116,13 +123,6 @@ module.exports = (db, opts = { dbOpts: {} }) => {
             (meta.geo.latitude || meta.geo.latitude === 0)) {
             meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
           }
-
-          if (opts.hide && opts.hide.path &&
-             (meta.path.indexOf(opts.hide.path) !== -1) &&
-             opts.hide.field && meta.body[opts.hide.field]) {
-            delete meta.body[opts.hide.field];
-          }
-
           op = db.collection(mongoCol).insertOne(meta);
         }
 

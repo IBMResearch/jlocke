@@ -34,13 +34,15 @@ MongoClient.connect(url)
 .then((db) => {
   dbg('Correctly connected to the DB');
 
-  test('with sensitive body content', (assert) => {
+  test('with sensitive body content (Mongo)', (assert) => {
     assert.plan(13);
 
     const app = express();
 
     app.use(bodyParser.json());
+
     app.use(toDb(db, { hide: { path: excludePath, field: excludeField } }));
+
     app.get('/', (req, res) => res.send('Hello World!'));
     app.post('/login', (req, res) => {
       if (req.body.username === 'ola') {

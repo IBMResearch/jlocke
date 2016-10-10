@@ -20,7 +20,7 @@ The middleware expects to receive the next parameters. Please visit [the tests](
 - `opts` is an object with the optional ones:
  - `geo` (boolean) - To make an extra request to get also the request IP address location. (default: false)
  - `idFunc(req, res)` (function) - Promise to add also the user ID with the request info. It's going to receive the Express ["Request"](http://expressjs.com/es/4x/api.html#req) and ["Response"](http://expressjs.com/es/4x/api.html#res) objects. So you can use them inside. (default: not used)
- - `hide`: To avoid to store sensitive data in the DB.
+ - `hide`: To avoid to store sensitive data in the DB for a POST route.
  - `dbOpts` (object) - Specific DB options.
 
 About the `hide`object:
