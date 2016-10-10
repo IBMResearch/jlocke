@@ -35,12 +35,13 @@ const ensureIndexes = require('./lib/ensureIndexes');
 
 
 module.exports = (db, opts = { dbOpts: {} }) => {
-  const dbType = opts.dbOpts.type || 'mongo';
+  const dbOpts = opts.dbOpts || {};
+  const dbType = dbOpts.type || 'mongo';
   // Specific for MongoDB
-  const mongoCol = opts.dbOpts.colName || 'requests';
+  const mongoCol = dbOpts.colName || 'requests';
   // Elastic
-  const elasIndex = opts.dbOpts.indexName || 'searchbyrequest';
-  const elasType = opts.dbOpts.elasType || 'requests';
+  const elasIndex = dbOpts.indexName || 'searchbyrequest';
+  const elasType = dbOpts.elasType || 'requests';
 
   // To be sure that the proper indexes exist.
   ensureIndexes(db, {
@@ -131,6 +132,12 @@ module.exports = (db, opts = { dbOpts: {} }) => {
             (meta.geo.longitude || meta.geo.longitude === 0) &&
             (meta.geo.latitude || meta.geo.latitude === 0)) {
             meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
+          }
+
+          if (opts.hide && opts.hide.path &&
+             (meta.path.indexOf(opts.hide.path) !== -1) &&
+             opts.hide.field && meta.body[opts.hide.field]) {
+            delete meta.body[opts.hide.field];
           }
 
           op = db.collection(mongoCol).insertOne(meta);
