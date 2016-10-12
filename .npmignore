@@ -21,7 +21,6 @@ npm-debug.log
 
 test
 .gitignore
-README
 .eslintrc
 .editorconfig
 .travis.yml
