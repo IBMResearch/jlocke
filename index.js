@@ -92,7 +92,7 @@ module.exports = (db, opts = { dbOpts: {} }) => {
         if (meta.method === 'POST' &&
             opts.hide && opts.hide.path &&
            (meta.path.indexOf(opts.hide.path) !== -1) &&
-           opts.hide.field && meta.body[opts.hide.field]) {
+           opts.hide.field && meta.body && meta.body[opts.hide.field]) {
           delete meta.body[opts.hide.field];
         }
 
