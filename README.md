@@ -1,7 +1,7 @@
 # jlocke-express-middleware
 
-[![Continuos integration](https://api.travis-ci.org/IBMResearch/jlocke-express-middleware.svg)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
-[![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880)
+[![Continuos integration](https://travis-ci.org/IBMResearch/jlocke-express-middleware.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
+[![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b)
 
 Express middleware to store requests metadata to a DB. For now we support [MongoDB](https://www.mongodb.com/) and [Elastic](https://www.elastic.co/). We use it [JLocke](https://api.travis-ci.org/IBMResearch/jlocke) project and other internal ones.
 
