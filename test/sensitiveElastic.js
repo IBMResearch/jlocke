@@ -17,7 +17,7 @@ const bodyParser = require('body-parser');
 const elastic = require('elasticsearch');
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
-const dbg = require('debug')('express-middleware-todb:test:elastic');
+const dbg = require('debug')('jlocke-express-middleware:test:elastic');
 
 const toDb = require('../');
 
@@ -38,39 +38,37 @@ const db = new elastic.Client({
 
 
 test('with DB options (Elastic)', (assert) => {
-  assert.plan(22);
+  assert.plan(21);
 
-  const app = express();
-  app.use(bodyParser.json());
+  // To drop the old ones (from old test runs).
+  dbg('Checking if the indexes exist ...');
+  db.indices.exists({ index: indexName })
+  .then((exists) => {
+    let deleteIndex = Promise.resolve();
+    if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
 
-  // The middleware needs an alive DB connection.
-  app.use(toDb(db, {
-    hide: { path: excludePath, field: excludeField },
-    dbOpts: { type: 'elastic' },
-  }));
+    deleteIndex
+    .then(() => {
+      const app = express();
+      app.use(bodyParser.json());
 
-  // Routes should be defined after the middlewares.
-  app.get('/', (req, res) => res.send('Hello World!'));
-  app.post('/login', (req, res) => {
-    if (req.body.username === 'ola') {
-      res.send({ username: 'test', token: 'aaa' });
-    } else {
-      res.status(401).send(badLoginMsg);
-    }
-  });
+      // The middleware needs an alive DB connection.
+      app.use(toDb(db, { hide: { path: excludePath, field: excludeField } }));
 
-  // So we need it ready before starting the app to avoid losing initial requests data.
-  const server = app.listen(port, () => {
-    dbg(`Example app listening on port: ${port}`);
+      // Routes should be defined after the middlewares.
+      app.get('/', (req, res) => res.send('Hello World!'));
 
-    db.indices.exists({ index: indexName })
-    .then((exists) => {
-      let deleteIndex = Promise.resolve();
-      if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
+      app.post('/login', (req, res) => {
+        if (req.body.username === 'ola') {
+          res.send({ username: 'test', token: 'aaa' });
+        } else {
+          res.status(401).send(badLoginMsg);
+        }
+      });
 
-      // To drop the old ones (from old test runs).
-      deleteIndex
-      .then(() => {
+      // So we need it ready before starting the app to avoid losing initial requests data.
+      const server = app.listen(port, () => {
+        dbg(`Example app listening on port: ${port}`);
         const reqOpts = {
           url: `http://127.0.0.1:${port}/login`,
           method: 'POST',
@@ -105,14 +103,13 @@ test('with DB options (Elastic)', (assert) => {
                 assert.equal(body.hits.hits[0]._source.path, '/login');
                 assert.equal(body.hits.hits[0]._source.method, 'POST');
                 assert.equal(body.hits.hits[0]._source.protocol, 'http');
-                assert.equal(body.hits.hits[0]._source.ip, '::ffff:127.0.0.1');
+                assert.equal(body.hits.hits[0]._source.ip, '127.0.0.1');
                 assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:4444');
                 assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
                 assert.equal(body.hits.hits[0]._source.originalUrl, '/login');
                 // Elastic returns it as an string.
                 assert.type(body.hits.hits[0]._source.timestamp, 'string');
                 assert.equal(body.hits.hits[0]._source.responseCode, 200);
-                assert.equal(body.hits.hits[0]._source.body.username, 'ola');
                 assert.equal(body.hits.hits[0]._source.body[excludeField], undefined);
                 /* eslint-enable no-underscore-dangle */
 
@@ -124,9 +121,9 @@ test('with DB options (Elastic)', (assert) => {
           }, 3000);
         })
         .catch(err => assert.fail(`Making the request: ${err.message}`));
-      })
-      .catch(err => assert.fail(`Checking the actual indexes: ${err.message}`));
+      });
     })
     .catch(err => assert.fail(`Dropping the old requests: ${err.message}`));
-  });
+  })
+  .catch(err => assert.fail(`Checking the actual indexes: ${err.message}`));
 });

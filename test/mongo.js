@@ -17,13 +17,14 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
-const dbg = require('debug')('express-middleware-todb:test:mongo');
+const dbg = require('debug')('jlocke-express-middleware:test:mongo');
 
 const toDb = require('../');
 
 const port = 9999;
 const url = 'mongodb://localhost:27017/requests-monitor';
 const colName = 'requests2';
+const userAgent = 'testAgent';
 
 const idFunc = req => Promise.resolve(req.session.id);
 
@@ -34,7 +35,7 @@ MongoClient.connect(url)
   dbg('Correctly connected to the DB');
 
   test('with options (MongoDB)', (assert) => {
-    assert.plan(17);
+    assert.plan(18);
 
     const app = express();
     app.use(bodyParser.json());
@@ -51,7 +52,7 @@ MongoClient.connect(url)
       geo: true,
       idFunc,
       omitBody: ['login', 'password'],
-      dbOpts: { colName },
+      dbOpts: { type: 'mongo', colName },
     }));
 
     // Routes should be defined after the middlewares.
@@ -64,7 +65,7 @@ MongoClient.connect(url)
       // When we run the tests locally we may have older ones.
       db.collection(colName).removeMany()
       .then(() => {
-        makeReq(`http://127.0.0.1:${port}`)
+        makeReq(`http://127.0.0.1:${port}`, { headers: { 'User-Agent': userAgent } })
         .then((httpRes) => {
           assert.equal(httpRes[1], 'Hello World!');
 
@@ -78,9 +79,10 @@ MongoClient.connect(url)
               assert.equal(res[0].path, '/');
               assert.equal(res[0].method, 'GET');
               assert.equal(res[0].protocol, 'http');
-              assert.equal(res[0].ip, '::ffff:127.0.0.1');
+              assert.equal(res[0].ip, '127.0.0.1');
               assert.equal(res[0].headers.host, '127.0.0.1:9999');
               assert.equal(res[0].headers.connection, 'close');
+              assert.equal(res[0].headers['user-agent'], userAgent);
               assert.equal(res[0].originalUrl, '/');
               assert.type(res[0].timestamp, 'object');
               assert.equal(res[0].responseCode, 200);

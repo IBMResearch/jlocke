@@ -17,7 +17,7 @@ const bodyParser = require('body-parser');
 const elastic = require('elasticsearch');
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
-const dbg = require('debug')('express-middleware-todb:test:elastic');
+const dbg = require('debug')('jlocke-express-middleware:test:elastic');
 
 const toDb = require('../');
 
@@ -37,27 +37,28 @@ const db = new elastic.Client({
 test('with DB options (Elastic)', (assert) => {
   assert.plan(24);
 
-  const app = express();
-  app.use(bodyParser.json());
+  // To drop the old ones (from old test runs).
+  dbg('Checking if the indexes exist ...');
+  db.indices.exists({ index: indexName })
+  .then((exists) => {
+    let deleteIndex = Promise.resolve();
+    if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
 
-  // The middleware needs an alive DB connection.
-  app.use(toDb(db, { geo: true, dbOpts: { type: 'elastic', indexName, elasType } }));
+    deleteIndex
+    .then(() => {
+      const app = express();
+      app.use(bodyParser.json());
 
-  // Routes should be defined after the middlewares.
-  app.get('/', (req, res) => res.send('Hello World!'));
+      // The middleware needs an alive DB connection.
+      app.use(toDb(db, { geo: true, dbOpts: { indexName, elasType } }));
 
-  // So we need it ready before starting the app to avoid losing initial requests data.
-  const server = app.listen(port, () => {
-    dbg(`Example app listening on port: ${port}`);
+      // Routes should be defined after the middlewares.
+      app.get('/', (req, res) => res.send('Hello World!'));
 
-    db.indices.exists({ index: indexName })
-    .then((exists) => {
-      let deleteIndex = Promise.resolve();
-      if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
+      // So we need it ready before starting the app to avoid losing initial requests data.
+      const server = app.listen(port, () => {
+        dbg(`Example app listening on port: ${port}`);
 
-      // To drop the old ones (from old test runs).
-      deleteIndex
-      .then(() => {
         makeReq(`http://127.0.0.1:${port}`)
         .then((httpRes) => {
           assert.equal(httpRes[1], 'Hello World!');
@@ -87,7 +88,7 @@ test('with DB options (Elastic)', (assert) => {
                 assert.equal(body.hits.hits[0]._source.path, '/');
                 assert.equal(body.hits.hits[0]._source.method, 'GET');
                 assert.equal(body.hits.hits[0]._source.protocol, 'http');
-                assert.equal(body.hits.hits[0]._source.ip, '::ffff:127.0.0.1');
+                assert.equal(body.hits.hits[0]._source.ip, '127.0.0.1');
                 assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
                 assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
                 assert.equal(body.hits.hits[0]._source.originalUrl, '/');
@@ -113,9 +114,9 @@ test('with DB options (Elastic)', (assert) => {
           }, 3000);
         })
         .catch(err => assert.fail(`Making the request: ${err.message}`));
-      })
-      .catch(err => assert.fail(`Checking the actual indexes: ${err.message}`));
+      });
     })
     .catch(err => assert.fail(`Dropping the old requests: ${err.message}`));
-  });
+  })
+  .catch(err => assert.fail(`Checking the actual indexes: ${err.message}`));
 });

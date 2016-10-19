@@ -1,15 +1,15 @@
-# express-middleware-todb
+# jlocke-express-middleware
 
-[![Continuos integration](https://api.travis-ci.org/IBMResearch/express-middleware-todb.svg)](https://travis-ci.org/IBMResearch/express-middleware-todb)
+[![Continuos integration](https://api.travis-ci.org/IBMResearch/jlocke-express-middleware.svg)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
 [![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/ff6b7a19-f947-4807-80d1-320e8a842880)
 
-Express middleware to store requests metadata to a DB. For now we support [MongoDB](https://www.mongodb.com/) and [Elastic](https://www.elastic.co/).
+Express middleware to store requests metadata to a DB. For now we support [MongoDB](https://www.mongodb.com/) and [Elastic](https://www.elastic.co/). We use it [JLocke](https://api.travis-ci.org/IBMResearch/jlocke) project and other internal ones.
 
 
 ## Install
 
 ```sh
-npm i --save express-middleware-todb
+npm i --save jlocke-express-middleware
 ```
 
 
@@ -28,13 +28,13 @@ About the `hide`object:
 - `field` (string) : Name of the object field to exclude (ie: 'password').
 
 About the `dbOpts` object:
-- `type` (string) - Type of the database ("mongo" or "elastic"). (default: "mongo")
+- `type` (string) - Type of the database ("mongo" or "elastic"). (default: "elastic")
 The rest depend of the selected type:
-- MongoDB:
- - `colName` (string) - Name of the "collection" to store the requests info. The "index" in the case of Elastic (default: 'requests')
 - Elastic:
  - `indexName` (string) - Name of the "index" to store the requests info. (default: 'searchByRequest')
  - `elasType` (string) - Type of the element to store the requests info. (default: 'requests')
+- MongoDB:
+ - `colName` (string) - Name of the "collection" to store the requests info. The "index" in the case of Elastic (default: 'requests')
 
 
 ## Developer guide

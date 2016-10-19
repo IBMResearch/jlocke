@@ -1,5 +1,5 @@
 {
-  "name": "express-middleware-todb",
+  "name": "jlocke-express-middleware",
   "description": "Express middleware to store requests metadata into a database.",
   "version": "1.0.0",
   "author": {
@@ -7,11 +7,11 @@
     "email": "isf@zurich.ibm.com"
   },
   "contributors": [
-    "https://github.com/IBMResearch/express-middleware-todb/graphs/contributors"
+    "https://github.com/IBMResearch/jlocke-express-middleware/graphs/contributors"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/IBMResearch/express-middleware-todb/express-middleware-todb.git"
+    "url": "https://github.com/IBMResearch/jlocke-express-middleware/jlocke-express-middleware.git"
   },
   "keywords": [
     "loopback",
@@ -20,10 +20,18 @@
     "request",
     "requests",
     "database",
-    "IBM"
+    "IBM",
+    "elastic",
+    "elasticsearch",
+    "mongo",
+    "mongodb",
+    "jlocke",
+    "IDS",
+    "web",
+    "firewall"
   ],
   "bugs": {
-    "url": "https://github.com/IBMResearch/express-middleware-todb/issues"
+    "url": "https://github.com/IBMResearch/jlocke-express-middleware/issues"
   },
   "scripts": {
     "start": "node bin",
@@ -39,6 +47,7 @@
     "bluebird": "^3.4.6",
     "debug": "^2.2.0",
     "elasticsearch": "^11.0.1",
+    "ipaddr.js": "^1.2.0",
     "iplocation": "^2.0.1",
     "tiny-promisify": "^0.1.1"
   },

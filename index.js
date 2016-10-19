@@ -9,8 +9,11 @@
 
 'use strict';
 
+const isV6 = require('net').isIPv6;
+
+const ipaddr = require('ipaddr.js');
 const Promise = require('bluebird');
-const dbg = require('debug')('express-middleware-todb');
+const dbg = require('debug')('jlocke-express-middleware');
 
 const getLocation = require('tiny-promisify')(require('iplocation'));
 
@@ -19,7 +22,7 @@ const ensureIndexes = require('./lib/ensureIndexes');
 
 module.exports = (db, opts = { dbOpts: {} }) => {
   const dbOpts = opts.dbOpts || {};
-  const dbType = dbOpts.type || 'mongo';
+  const dbType = dbOpts.type || 'elastic';
   // Specific for MongoDB
   const mongoCol = dbOpts.colName || 'requests';
   // Elastic
@@ -42,15 +45,30 @@ module.exports = (db, opts = { dbOpts: {} }) => {
     // We don't want to wait until the DB write is done to keep answering to more HTTP requests.
     next();
 
+    // Elastic only support v4 IP addresses, so we need to convert it.
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/ip.html
+
     const meta = {
       path: req.path,
       method: req.method,
       protocol: req.protocol,
-      ip: req.ip,
       headers: req.headers,
       originalUrl: req.originalUrl,
       timestamp: new Date(),
     };
+    if (req.ip) {
+      let goodIp = req.ip;
+
+      if (isV6(goodIp)) {
+        dbg('Detected v6 IP address, converting it to v4 ...');
+        const address = ipaddr.parse(goodIp);
+        goodIp = address.toIPv4Address().toString();
+      }
+
+      meta.ip = goodIp;
+      dbg(`Converted IP: ${goodIp}`);
+    }
+
     if (Object.keys(req.params).length > 0) {
       meta.params = req.param;
       dbg('Parameters found:', req.params);
@@ -93,13 +111,21 @@ module.exports = (db, opts = { dbOpts: {} }) => {
             opts.hide && opts.hide.path &&
            (meta.path.indexOf(opts.hide.path) !== -1) &&
            opts.hide.field && meta.body && meta.body[opts.hide.field]) {
+          dbg(`Dropping hidded field: ${opts.hide.field}`);
           delete meta.body[opts.hide.field];
         }
 
         let op;
-        // MongoDB is the default option.
-        // Checking that it's not a MongoDB instance -> should be Elastic.
-        if (opts.dbOpts && opts.dbOpts.type === 'elastic') {
+        if (dbType === 'mongo') {
+          // Formating geo data for MongoDB.
+          // https://docs.mongodb.com/manual/core/2dsphere/
+          if (meta.geo &&
+            (meta.geo.longitude || meta.geo.longitude === 0) &&
+            (meta.geo.latitude || meta.geo.latitude === 0)) {
+            meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
+          }
+          op = db.collection(mongoCol).insertOne(meta);
+        } else {
           // Formating geo data for Elastic. The field name "location" is mandatory:
           // https://www.elastic.co/guide/en/elasticsearch/guide/current/lat-lon-formats.html
 
@@ -115,15 +141,6 @@ module.exports = (db, opts = { dbOpts: {} }) => {
             type: elasType,
             body: meta,
           });
-        } else {
-          // Formating geo data for MongoDB.
-          // https://docs.mongodb.com/manual/core/2dsphere/
-          if (meta.geo &&
-            (meta.geo.longitude || meta.geo.longitude === 0) &&
-            (meta.geo.latitude || meta.geo.latitude === 0)) {
-            meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
-          }
-          op = db.collection(mongoCol).insertOne(meta);
         }
 
         op

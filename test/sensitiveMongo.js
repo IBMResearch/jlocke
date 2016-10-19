@@ -16,7 +16,7 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const makeReq = require('tiny-promisify')(require('request'), { multiArgs: true });
 /* eslint-enable import/no-extraneous-dependencies */
-const dbg = require('debug')('express-middleware-todb:test:noOpts');
+const dbg = require('debug')('jlocke-express-middleware:test:noOpts');
 
 const toDb = require('../');
 
@@ -41,7 +41,10 @@ MongoClient.connect(url)
 
     app.use(bodyParser.json());
 
-    app.use(toDb(db, { hide: { path: excludePath, field: excludeField } }));
+    app.use(toDb(db, {
+      hide: { path: excludePath, field: excludeField },
+      dbOpts: { type: 'mongo' },
+    }));
 
     app.get('/', (req, res) => res.send('Hello World!'));
     app.post('/login', (req, res) => {
@@ -73,7 +76,7 @@ MongoClient.connect(url)
               assert.equal(res[0].path, '/login');
               assert.equal(res[0].method, 'POST');
               assert.equal(res[0].protocol, 'http');
-              assert.equal(res[0].ip, '::ffff:127.0.0.1');
+              assert.equal(res[0].ip, '127.0.0.1');
               assert.equal(res[0].headers.host, '127.0.0.1:5555');
               assert.equal(res[0].headers.connection, 'close');
               assert.equal(res[0].originalUrl, '/login');
