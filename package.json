@@ -67,7 +67,7 @@
     "tap": "^7.1.2"
   },
   "engines": {
-    "node": "6.7.0",
+    "node": "6.x.x",
     "npm": "3.x.x"
   },
   "license": "MIT"
