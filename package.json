@@ -1,7 +1,7 @@
 {
   "name": "jlocke-express-middleware",
-  "description": "Express middleware to store requests metadata into a database.",
-  "version": "1.0.0",
+  "description": "Express middleware to store requests metadata into a Elastic.",
+  "version": "0.0.1",
   "author": {
     "name": "IBM Research - Science & Solutions team",
     "email": "isf@zurich.ibm.com"
@@ -23,8 +23,6 @@
     "IBM",
     "elastic",
     "elasticsearch",
-    "mongo",
-    "mongodb",
     "jlocke",
     "IDS",
     "web",
@@ -46,9 +44,8 @@
   "dependencies": {
     "bluebird": "^3.4.6",
     "debug": "^2.2.0",
-    "elasticsearch": "^11.0.1",
+    "elasticsearch": "^13.3.1",
     "ipaddr.js": "^1.2.0",
-    "iplocation": "^2.0.1",
     "tiny-promisify": "^0.1.1"
   },
   "devDependencies": {
@@ -59,8 +56,6 @@
     "eslint-plugin-import": "^1.16.0",
     "eslint-plugin-json": "^1.2.0",
     "express": "^4.14.0",
-    "express-session": "^1.14.1",
-    "mongodb": "^2.2.10",
     "npm-check-updates": "^2.8.0",
     "nsp": "^2.1.0",
     "request": "^2.75.0",

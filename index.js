@@ -13,29 +13,27 @@ const isV6 = require('net').isIPv6;
 
 const ipaddr = require('ipaddr.js');
 const Promise = require('bluebird');
-const dbg = require('debug')('jlocke-express-middleware');
+const elastic = require('elasticsearch');
 
-const getLocation = require('tiny-promisify')(require('iplocation'));
+const dbg = require('debug')('jlocke-express-middleware');
 
 const ensureIndexes = require('./lib/ensureIndexes');
 
 
-module.exports = (db, opts = { dbOpts: {} }) => {
+module.exports = (uri, opts = { dbOpts: {} }) => {
   const dbOpts = opts.dbOpts || {};
-  const dbType = dbOpts.type || 'elastic';
-  // Specific for MongoDB
-  const mongoCol = dbOpts.colName || 'requests';
-  // Elastic
-  const elasIndex = dbOpts.indexName || 'searchbyrequest';
-  const elasType = dbOpts.elasType || 'requests';
+  const index = dbOpts.index || 'searchbyrequest';
+  const type = dbOpts.type || 'requests';
+
+  dbg(`Starting, connecting to the DB: ${uri}`);
+  // TODO: Try catch? with proper error reporting?
+  const db = new elastic.Client({
+    host: uri,
+    // log: 'trace',
+  });
 
   // To be sure that the proper indexes exist.
-  ensureIndexes(db, {
-    // The default is mongo
-    type: dbType,
-    mongo: { col: mongoCol },
-    elastic: { index: elasIndex, type: elasType },
-  })
+  ensureIndexes(db, index, type)
   .then(() => dbg('Indexes are correct'))
   .catch((err) => { throw Error(`Doing the index stuff: ${err.message}`); });
 
@@ -87,24 +85,15 @@ module.exports = (db, opts = { dbOpts: {} }) => {
       // Adding geolocation info if the proper options is passed.
       // We only need to check for it if the user pass the option. (default: false).
       let getId = Promise.resolve();
-      if (opts.idFunc) {
+      if (opts.idFun) {
         // TODO: Confirm that also works with LoopBack. ("res.app")
-        getId = opts.idFunc(req, res);
+        getId = opts.idFun(req, res);
         dbg('The user passed a function to get the user ID ...');
       }
 
-      // We only need to check for it if the user pass the option. (default: false).
-      let getLoc = Promise.resolve();
-      // Adding geolocation info if the proper options is passed.
-      if (opts.geo && req.ip) {
-        getLoc = getLocation(req.ip);
-        dbg('The user asked for the location ...');
-      }
-
-      Promise.join(getId, getLoc)
+      getId
       .then((result) => {
-        if (result[0]) { meta.userId = result[0]; }
-        if (result[1]) { meta.geo = result[1]; }
+        if (result) { meta.userId = result; }
         dbg('Inserting found request metadata in the DB', meta);
 
         if (meta.method === 'POST' &&
@@ -115,39 +104,11 @@ module.exports = (db, opts = { dbOpts: {} }) => {
           delete meta.body[opts.hide.field];
         }
 
-        let op;
-        if (dbType === 'mongo') {
-          // Formating geo data for MongoDB.
-          // https://docs.mongodb.com/manual/core/2dsphere/
-          if (meta.geo &&
-            (meta.geo.longitude || meta.geo.longitude === 0) &&
-            (meta.geo.latitude || meta.geo.latitude === 0)) {
-            meta.location = { type: 'Point', coordinates: [meta.geo.longitude, meta.geo.latitude] };
-          }
-          op = db.collection(mongoCol).insertOne(meta);
-        } else {
-          // Formating geo data for Elastic. The field name "location" is mandatory:
-          // https://www.elastic.co/guide/en/elasticsearch/guide/current/lat-lon-formats.html
-
-          if (meta.geo &&
-            // "longitude" and "latitude" can be 0.
-            (meta.geo.longitude || meta.geo.longitude === 0) &&
-            (meta.geo.latitude || meta.geo.latitude === 0)) {
-            meta.location = { lon: meta.geo.longitude, lat: meta.geo.latitude };
-          }
-
-          op = db.index({
-            index: elasIndex,
-            type: elasType,
-            body: meta,
-          });
-        }
-
-        op
+        db.index({ index, type, body: meta })
         .then(() => dbg('New metadata correctly inserted'))
         .catch((err) => { throw Error(`Adding the requests metadata: ${err.message}`); });
       })
-      .catch((err) => { throw Error(`Getting the user ID or IP geolocation: ${err.message}`); });
+      .catch((err) => { throw Error(`Getting the user ID: ${err.message}`); });
     });
   };
 };

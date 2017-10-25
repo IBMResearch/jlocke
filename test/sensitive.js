@@ -23,8 +23,8 @@ const toDb = require('../');
 
 const port = 4444;
 const url = 'localhost:9200';
-const indexName = 'searchbyrequest';
-const elasType = 'requests';
+const index = 'searchbyrequest';
+const type = 'requests';
 const excludePath = 'login';
 const excludeField = 'password';
 const badLoginMsg = 'login failed';
@@ -37,15 +37,15 @@ const db = new elastic.Client({
 });
 
 
-test('with DB options (Elastic)', (assert) => {
+test('with DB options', (assert) => {
   assert.plan(21);
 
   // To drop the old ones (from old test runs).
   dbg('Checking if the indexes exist ...');
-  db.indices.exists({ index: indexName })
+  db.indices.exists({ index })
   .then((exists) => {
     let deleteIndex = Promise.resolve();
-    if (exists) { deleteIndex = db.indices.delete({ index: indexName }); }
+    if (exists) { deleteIndex = db.indices.delete({ index }); }
 
     deleteIndex
     .then(() => {
@@ -53,7 +53,7 @@ test('with DB options (Elastic)', (assert) => {
       app.use(bodyParser.json());
 
       // The middleware needs an alive DB connection.
-      app.use(toDb(db, { hide: { path: excludePath, field: excludeField } }));
+      app.use(toDb(url, { hide: { path: excludePath, field: excludeField } }));
 
       // Routes should be defined after the middlewares.
       app.get('/', (req, res) => res.send('Hello World!'));
@@ -82,10 +82,7 @@ test('with DB options (Elastic)', (assert) => {
           // to wait for these operation to answer more HTTP requests. So we have to
           // wait a bit here to let it finish.
           setTimeout(() => {
-            db.search({
-              index: indexName,
-              type: elasType,
-            })
+            db.search({ index, type })
             .then(
               (body) => {
                 assert.deepEqual(Object.keys(body), ['took', 'timed_out', '_shards', 'hits']);
@@ -95,8 +92,8 @@ test('with DB options (Elastic)', (assert) => {
                 assert.equal(body.hits.max_score, 1);
                 assert.equal(body.hits.hits.length, 1);
                 /* eslint-disable no-underscore-dangle */
-                assert.equal(body.hits.hits[0]._index, indexName);
-                assert.equal(body.hits.hits[0]._type, elasType);
+                assert.equal(body.hits.hits[0]._index, index);
+                assert.equal(body.hits.hits[0]._type, type);
                 assert.type(body.hits.hits[0]._id, 'string');
                 assert.equal(body.hits.hits[0]._id.length, 20);
                 assert.equal(body.hits.hits[0]._score, 1);
