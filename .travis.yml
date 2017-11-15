@@ -1,11 +1,10 @@
 language: node_js
 node_js:
-  - "6"
+  - "8"
 
 sudo: false
 
 services:
-  - mongodb
   - elasticsearch
 
 before_script:
