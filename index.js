@@ -61,7 +61,7 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
 
     if (req.ip) {
       meta.ip = req.ip;
-      dbg(`Converted IP: ${goodIp}`);
+      dbg(`Converted IP: ${meta.ip}`);
     }
 
     if (req.params && Object.keys(req.params).length > 0) {
