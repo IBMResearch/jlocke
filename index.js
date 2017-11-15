@@ -9,9 +9,6 @@
 
 'use strict';
 
-const isV6 = require('net').isIPv6;
-
-const ipaddr = require('ipaddr.js');
 const Promise = require('bluebird');
 const elastic = require('elasticsearch');
 
@@ -24,6 +21,7 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
   const dbOpts = opts.dbOpts || {};
   const index = dbOpts.index || 'searchbyrequest';
   const type = dbOpts.type || 'requests';
+  let dbReady = false;
 
   dbg(`Starting, connecting to the DB: ${uri}`);
   // TODO: Try catch? with proper error reporting?
@@ -34,14 +32,20 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
 
   // To be sure that the proper indexes exist.
   ensureIndexes(db, index, type)
-  .then(() => dbg('Indexes are correct'))
-  .catch((err) => { throw Error(`Doing the index stuff: ${err.message}`); });
+  .then(() => {
+    dbg('Indexes are correct');
+    dbReady = true;
+  })
+  .catch((err) => { throw Error(`Checking the indexes: ${err.message}`); });
 
   return (req, res, next) => {
     dbg('New request');
 
     // We don't want to wait until the DB write is done to keep answering to more HTTP requests.
     next();
+
+    // We don't use the Elastic if it's not up or with index errors.
+    if (!dbReady) { return; }
 
     // Elastic only support v4 IP addresses, so we need to convert it.
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/ip.html
@@ -54,24 +58,17 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
       originalUrl: req.originalUrl,
       timestamp: new Date(),
     };
+
     if (req.ip) {
-      let goodIp = req.ip;
-
-      if (isV6(goodIp)) {
-        dbg('Detected v6 IP address, converting it to v4 ...');
-        const address = ipaddr.parse(goodIp);
-        goodIp = address.toIPv4Address().toString();
-      }
-
-      meta.ip = goodIp;
+      meta.ip = req.ip;
       dbg(`Converted IP: ${goodIp}`);
     }
 
-    if (Object.keys(req.params).length > 0) {
+    if (req.params && Object.keys(req.params).length > 0) {
       meta.params = req.param;
       dbg('Parameters found:', req.params);
     }
-    if (Object.keys(req.body).length > 0) {
+    if (req.body && Object.keys(req.body).length > 0) {
       meta.body = req.body;
       dbg('Body found:', req.body);
     }
