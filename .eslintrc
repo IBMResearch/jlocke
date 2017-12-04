@@ -6,5 +6,10 @@
     "strict": [0]
   },
 
-  "plugins": ["json"]
+  "plugins": ["json"],
+
+  "env": {
+    "mocha": true,
+    "node": true
+  }
 }
