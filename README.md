@@ -11,6 +11,14 @@ Express middleware to store requests metadata to an [Elastic](https://www.elasti
 npm i --save jlocke-express-middleware
 ```
 
+## Setup
+
+Add your Elastic URL to this script and run it once before the first deployment.
+
+```sh
+node scripts/ensureIndexes.js
+```
+
 ## Use
 
 ### `jlocke(uri, opts)`

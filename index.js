@@ -9,34 +9,24 @@
 
 'use strict';
 
-const Promise = require('bluebird');
 const elastic = require('elasticsearch');
 
 const dbg = require('debug')('jlocke-express-middleware');
 
-const ensureIndexes = require('./lib/ensureIndexes');
+const defaults = require('./defaults');
 
 
 module.exports = (uri, opts = { dbOpts: {} }) => {
   const dbOpts = opts.dbOpts || {};
-  const index = dbOpts.index || 'searchbyrequest';
-  const type = dbOpts.type || 'requests';
-  let dbReady = false;
+  const index = dbOpts.index || defaults.index.name;
+  const type = dbOpts.type || defaults.index.type;
 
   dbg(`Starting, connecting to the DB: ${uri}`);
   // TODO: Try catch? with proper error reporting?
   const db = new elastic.Client({
     host: uri,
-    // log: 'trace',
+    log: 'trace',
   });
-
-  // To be sure that the proper indexes exist.
-  ensureIndexes(db, index, type)
-  .then(() => {
-    dbg('Indexes are correct');
-    dbReady = true;
-  })
-  .catch((err) => { throw Error(`Checking the indexes: ${err.message}`); });
 
   return (req, res, next) => {
     dbg('New request');
@@ -44,11 +34,10 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
     // We don't want to wait until the DB write is done to keep answering to more HTTP requests.
     next();
 
-    // We don't use the Elastic if it's not up or with index errors.
-    if (!dbReady) { return; }
-
     // Elastic only support v4 IP addresses, so we need to convert it.
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/ip.html
+
+    // ??? process.nextTick()
 
     const meta = {
       path: req.path,
@@ -61,7 +50,7 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
 
     if (req.ip) {
       meta.ip = req.ip;
-      dbg(`Converted IP: ${meta.ip}`);
+      dbg(`IP addr: ${meta.ip}`);
     }
 
     if (req.params && Object.keys(req.params).length > 0) {
@@ -89,23 +78,24 @@ module.exports = (uri, opts = { dbOpts: {} }) => {
       }
 
       getId
-      .then((result) => {
-        if (result) { meta.userId = result; }
-        dbg('Inserting found request metadata in the DB', meta);
+        .then((result) => {
+          if (result) { meta.userId = result; }
+          dbg('Inserting found request metadata in the DB', meta);
 
-        if (meta.method === 'POST' &&
-            opts.hide && opts.hide.path &&
-           (meta.path.indexOf(opts.hide.path) !== -1) &&
-           opts.hide.field && meta.body && meta.body[opts.hide.field]) {
-          dbg(`Dropping hidded field: ${opts.hide.field}`);
-          delete meta.body[opts.hide.field];
-        }
+          if (meta.method === 'POST' &&
+              opts.hide && opts.hide.path &&
+            (meta.path.indexOf(opts.hide.path) !== -1) &&
+            opts.hide.field && meta.body && meta.body[opts.hide.field]) {
+            dbg(`Dropping hidded field: ${opts.hide.field}`);
+            delete meta.body[opts.hide.field];
+          }
 
-        db.index({ index, type, body: meta })
-        .then(() => dbg('New metadata correctly inserted'))
-        .catch((err) => { throw Error(`Adding the requests metadata: ${err.message}`); });
-      })
-      .catch((err) => { throw Error(`Getting the user ID: ${err.message}`); });
+          // TODO: Add pipelining
+          db.index({ index, type, body: meta })
+            .then(() => dbg('New metadata correctly inserted'))
+            .catch((err) => { throw Error(`Adding the requests metadata: ${err.message}`); });
+        })
+        .catch((err) => { throw Error(`Getting the user ID: ${err.message}`); });
     });
   };
 };
