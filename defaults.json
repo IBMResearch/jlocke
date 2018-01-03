@@ -1,6 +1,6 @@
 {
   "index": {
-    "name": "searchbyrequest",
+    "name": "api-requests",
     "type": "requests"
   }
 }
