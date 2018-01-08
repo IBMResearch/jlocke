@@ -36,6 +36,8 @@ const typeErrors = 'testErr';
 const excludePath = 'login';
 const excludeField = 'password';
 const testUser = 'ola';
+const testReqId = 'AAA';
+const testUserId = 'BBB';
 let server;
 
 
@@ -61,6 +63,13 @@ describe('Acceptance', () => {
         const app = express();
         app.use(bodyParser.json());
 
+        // To save also the optional fields "userId" and "requestId".
+        // Probably you need something in runtime here.
+        app.use((req, res, next) => {
+          req.userId = (() => testUserId)();
+          req.requestId = (() => testReqId)();
+          next();
+        });
         app.use(jLocke.express({ hide: { path: excludePath, field: excludeField } }));
 
         // NOTE: Routes needs to be defined after the middleware.
@@ -83,7 +92,7 @@ describe('Acceptance', () => {
   });
 
 
-  it('express() should save all data for non hidden fields', async () => {
+  it('express() should save all data when non hidden fields', async () => {
     dbg('Making the HTTP request ...');
     const httpRes = await makeReq(`http://127.0.0.1:${port}`);
     dbg('HTTP request done');
@@ -116,6 +125,8 @@ describe('Acceptance', () => {
     // Elastic returns it as an string.
     assert.equal(typeof body.hits.hits[0]._source.timestamp, 'string');
     assert.equal(body.hits.hits[0]._source.responseCode, 200);
+    assert.equal(body.hits.hits[0]._source.requestId, testReqId);
+    assert.equal(body.hits.hits[0]._source.userId, testUserId);
     /* eslint-enable no-underscore-dangle */
   });
 
