@@ -53,7 +53,7 @@ Apart from the ones included by Express you can attach to the `req` object some 
 - `requestId` (string) - Request identifier.
 - `userId` (string) - User identifier.
 
-TODO: Link to the test lines with an example.
+Example [here](https://github.com/IBMResearch/jlocke-express-middleware/blob/master/test/acceptance.js#L68).
 
 ## Developer guide
 
