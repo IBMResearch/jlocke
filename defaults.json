@@ -1,6 +1,12 @@
 {
-  "index": {
-    "name": "api-requests",
-    "type": "requests"
+  "indexes": {
+    "api": {
+      "name": "api-requests",
+      "type": "requests"
+    },
+    "error": {
+      "name": "api-errors",
+      "type": "errors"
+    }
   }
 }
