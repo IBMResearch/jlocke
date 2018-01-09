@@ -36,8 +36,7 @@ const typeErrors = 'testErr';
 const excludePath = 'login';
 const excludeField = 'password';
 const testUser = 'ola';
-const testReqId = 'AAA';
-const testUserId = 'BBB';
+const testUserId = 'AAA';
 let server;
 
 
@@ -63,11 +62,10 @@ describe('Acceptance', () => {
         const app = express();
         app.use(bodyParser.json());
 
-        // To save also the optional fields "userId" and "requestId".
+        // To save also the "userId" field.
         // Probably you need something in runtime here.
         app.use((req, res, next) => {
           req.userId = (() => testUserId)();
-          req.requestId = (() => testReqId)();
           next();
         });
         app.use(jLocke.express({ hide: { path: excludePath, field: excludeField } }));
@@ -125,7 +123,6 @@ describe('Acceptance', () => {
     // Elastic returns it as an string.
     assert.equal(typeof body.hits.hits[0]._source.timestamp, 'string');
     assert.equal(body.hits.hits[0]._source.responseCode, 200);
-    assert.equal(body.hits.hits[0]._source.requestId, testReqId);
     assert.equal(body.hits.hits[0]._source.userId, testUserId);
     /* eslint-enable no-underscore-dangle */
   });
@@ -167,10 +164,9 @@ describe('Acceptance', () => {
     dbg('Making the error request ...');
     const errMsgCustom = 'Test custom';
     const errMsg = 'Test error';
-    const requestId = 'testReqId';
     const userId = 'testUserId';
 
-    await jLocke.error(errMsgCustom, new Error(errMsg), { requestId, userId });
+    await jLocke.error(errMsgCustom, new Error(errMsg), { userId });
 
     dbg('Error request done');
     sleep(10000);
@@ -192,7 +188,6 @@ describe('Acceptance', () => {
     assert.equal(result.hits.hits[0]._source.message, errMsgCustom);
     assert.equal(result.hits.hits[0]._source.errorMessage, errMsg);
     assert.equal(typeof result.hits.hits[0]._source.errorStack, 'string');
-    assert.equal(result.hits.hits[0]._source.requestId, requestId);
     assert.equal(result.hits.hits[0]._source.userId, userId);
     // Elastic returns it as an string.
     assert.equal(typeof result.hits.hits[0]._source.timestamp, 'string');

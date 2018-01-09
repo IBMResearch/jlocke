@@ -1,7 +1,7 @@
 {
   "name": "jlocke-express-middleware",
   "description": "Express middleware to store requests metadata into a Elastic.",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": {
     "name": "IBM Research - Science & Solutions team",
     "email": "isf@zurich.ibm.com"

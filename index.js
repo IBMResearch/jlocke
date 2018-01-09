@@ -90,11 +90,6 @@ module.exports.error = async (message, error, opts = {}) => {
     errorStack: error.stack,
   };
 
-  if (opts.requestId) {
-    errorInfo.requestId = opts.requestId;
-    dbg(`ReqId passed: ${opts.requestId}`);
-  }
-
   if (opts.userId) {
     errorInfo.userId = opts.userId;
     dbg(`UserId passed: ${opts.userId}`);
@@ -148,11 +143,6 @@ module.exports.express = (opts = {}) =>
     if (req.body && Object.keys(req.body).length > 0) {
       reqInfo.body = req.body;
       dbg('Body found:', req.body);
-    }
-
-    if (req.requestId) {
-      reqInfo.requestId = req.requestId;
-      dbg(`ReqId passed: ${req.requestId}`);
     }
 
     if (req.userId) {

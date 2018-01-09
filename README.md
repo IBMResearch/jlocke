@@ -33,14 +33,12 @@ To track the errors, ie: uncaughException, unhandledPromise. The middleware setu
 - `message` (string) - Custom error message.
 - `error` (object) - JavaScript `Error` object.
 - `opts` (object) - Optional values:
-  - `requestId` (string) - Request identifier to trace the error.
   - `userId` (string) - User identifier to trace the error.
 
-### `jLocke.express(uri, opts)` -> function
+### `jLocke.express(opts)` -> function
 
 To track the Express requests info. The middleware expects to receive the next parameters. Please visit [the tests](./test) for more details.
 
-- `uri` (string) - The database uri to connect to.
 - `opts` (object) - Optional values:
   - `hide` (object) - To avoid to store sensitive data in the DB for a POST route. (default: {})
     - `path` (string) - The substring of the path to exlude stuff (ie: "login").
@@ -48,9 +46,8 @@ To track the Express requests info. The middleware expects to receive the next p
 
 #### Adding more parameters
 
-Apart from the ones included by Express you can attach to the `req` object some useful ones to allow tracing:
+Apart from the ones included by Express you can attach to the `req` the user ID to allow tracing:
 
-- `requestId` (string) - Request identifier.
 - `userId` (string) - User identifier.
 
 Example [here](https://github.com/IBMResearch/jlocke-express-middleware/blob/master/test/acceptance.js#L68).
