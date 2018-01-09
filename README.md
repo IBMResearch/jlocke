@@ -3,7 +3,7 @@
 [![Continuos integration](https://travis-ci.org/IBMResearch/jlocke-express-middleware.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
 [![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b)
 
-Express middleware to store requests metadata to an [Elastic](https://www.elastic.co) instance. We use it [JLocke](https://api.travis-ci.org/IBMResearch/jlocke) project and other internal ones.
+Express middleware to store requests metadata to an [Elastic](https://www.elastic.co) instance. We use it in [JLocke](https://github.com/IBMResearch/jlocke) project and other internal ones.
 
 ## Install
 
