@@ -35,11 +35,11 @@ module.exports.init = async (uri, opts = {}) => {
 
   dbg(`Connecting to DB: ${uri}`);
 
+  const optsElastic = { host: uri };
+  if (opts.trace) { optsElastic.log = 'trace'; }
+
   try {
-    db = new elastic.Client({
-      host: uri,
-      log: 'trace',
-    });
+    db = new elastic.Client(optsElastic);
   } catch (err) {
     throw new Error(`Creating the Elastic client: ${err.message}`);
   }

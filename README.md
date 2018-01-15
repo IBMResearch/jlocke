@@ -21,6 +21,7 @@ The middleware setup expects:
 
 - `uri` (string) - The database uri to connect to.
 - `opts` (object) - DB optional values:
+  - `trace` (boolean) - To enable Elastic tracing. (default: false)
   - `indexRequests` (string) - Name of the Elastic index to store the requests info. (default: "api-requests-MM-DD-YYY")
   - `typeRequests` (string) - Elastic type of the element to store the requests info. (default: "requests")
   - `indexErrors` (string) - Name of the Elastic index to store the errors info. (default: "api-errors-MM-DD-YYY")
