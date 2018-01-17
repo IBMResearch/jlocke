@@ -57,6 +57,7 @@ describe('express()', () => {
   // beforeEach(async () => {
   before((done) => {
     jLocke.init(url, {
+      trace: true,
       indexRequests: index,
       typeRequests: type,
       indexErrors,
@@ -77,7 +78,7 @@ describe('express()', () => {
           hide: { path: excludePath, field: excludeField },
         }));
 
-        // NOTE: Routes needs to be defined after the middleware.
+        // NOTE: Routes need to be defined after the middleware.
         app.get(pathBase, (req, res) => res.send('Hello World!'));
         app.post(pathLogin, (req, res) => res.send({ username: 'test', token: 'aaa' }));
         app.get(pathHidden, (req, res) => res.send('Hello hidden!'));

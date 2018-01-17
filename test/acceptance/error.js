@@ -33,7 +33,7 @@ const typeErrors = 'testErr';
 dbg(`Starting, initing the DB connection: ${url}`);
 const db = new elastic.Client({
   host: url,
-  // log: 'trace',
+  log: 'trace',
 });
 
 
@@ -43,6 +43,7 @@ describe('error()', () => {
   // beforeEach(async () => {
   before((done) => {
     jLocke.init(url, {
+      trace: true,
       indexRequests: index,
       typeRequests: type,
       indexErrors,

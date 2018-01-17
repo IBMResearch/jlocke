@@ -13,7 +13,7 @@ npm i --save jlocke-express-middleware
 
 ## Use
 
-Please visit [the tests](./test) to see a full example.
+Please visit [the tests](./test) to see a full example. NOTE: Routes need to be defined after connecting this middleware to Express.
 
 ### async `jLocke.init(uri, opts)` -> Promise
 
