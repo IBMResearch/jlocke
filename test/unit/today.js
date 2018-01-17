@@ -11,7 +11,7 @@
 const assert = require('assert');
 
 // const dbg = require('debug')('jlocke-express-middleware:test:unit');
-const today = require('../lib/today');
+const today = require('../../lib/today');
 
 
 describe('Unit', () => {
