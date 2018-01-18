@@ -113,20 +113,7 @@ module.exports.express = (opts = {}) =>
       return;
     }
 
-    // console.log('-----------------------');
-    // console.log('-----------------------');
-    // console.log('-----------------------');
-    // console.log('opts.path');
-    // console.log(opts.path);
-    // console.log('req.path');
-    // console.log(req.path);
-    // console.log('opts.path');
-    // console.log(opts.path);
-
-    // console.log('-----------------------');
-    // console.log('-----------------------');
     if (opts.path && req.path.indexOf(opts.path) === -1) {
-      // eslint-disable-next-line no-console
       dbg('Request not logged (hidden path)', { path: req.path });
       return;
     }
@@ -179,7 +166,7 @@ module.exports.express = (opts = {}) =>
           opts.hide && opts.hide.path &&
         (reqInfo.path.indexOf(opts.hide.path) !== -1) &&
         opts.hide.field && reqInfo.body && reqInfo.body[opts.hide.field]) {
-        dbg(`Dropping hidded field: ${opts.hide.field}`);
+        dbg(`Dropping hidden field: ${opts.hide.field}`);
         delete reqInfo.body[opts.hide.field];
       }
 

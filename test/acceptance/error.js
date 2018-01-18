@@ -38,24 +38,17 @@ const db = new elastic.Client({
 
 
 describe('error()', () => {
-  // TODO: Not working.
-  // before(async () => {
-  // beforeEach(async () => {
-  before((done) => {
-    jLocke.init(url, {
+  before(async () => {
+    await jLocke.init(url, {
       trace: true,
       indexRequests: index,
       typeRequests: type,
       indexErrors,
       typeErrors,
-    })
-      .then(() => {
-        dbg('jLocke started');
+    });
 
-        // Lets give a time to end the index creation.
-        sleep(10000);
-        done();
-      });
+    dbg('jLocke started, waiting a bit for index creation to finish');
+    sleep(10000);
   });
 
 
