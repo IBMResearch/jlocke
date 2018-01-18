@@ -13,7 +13,10 @@ npm i --save jlocke-express-middleware
 
 ## Use
 
-Please visit [the tests](./test) to see a full example. NOTE: Routes need to be defined after connecting this middleware to Express.
+Please visit [the tests](./test) to see a full example. NOTES:
+
+- The "bodyParser" should be attached before the middleware to capture the body of the POST requests.
+- Routes need to be defined after connecting this middleware to Express.
 
 ### async `jLocke.init(uri, opts)` -> Promise
 

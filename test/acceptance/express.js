@@ -65,6 +65,7 @@ describe('express()', () => {
     })
       .then(() => {
         const app = express();
+
         app.use(bodyParser.json());
 
         // To save also the "userId" field.
@@ -78,7 +79,6 @@ describe('express()', () => {
           hide: { path: excludePath, field: excludeField },
         }));
 
-        // NOTE: Routes need to be defined after the middleware.
         app.get(pathBase, (req, res) => res.send('Hello World!'));
         app.post(pathLogin, (req, res) => res.send({ username: 'test', token: 'aaa' }));
         app.get(pathHidden, (req, res) => res.send('Hello hidden!'));
