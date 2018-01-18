@@ -113,8 +113,8 @@ module.exports.express = (opts = {}) =>
       return;
     }
 
-    if (opts.path && req.path.indexOf(opts.path) === -1) {
-      dbg('Request not logged (hidden path)', { path: req.path });
+    if (opts.path && req.baseUrl.indexOf(opts.path) === -1) {
+      dbg('Request not logged (hidden path)', { path: req.baseUrl.path });
       return;
     }
 
