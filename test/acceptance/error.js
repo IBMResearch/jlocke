@@ -16,7 +16,7 @@ const elastic = require('elasticsearch');
 const sleep = require('system-sleep');
 /* eslint-enable import/no-extraneous-dependencies */
 
-const dbg = require('debug')('jlocke-express-middleware:test:acceptance');
+const dbg = require('debug')('jlocke:test:acceptance');
 const jLocke = require('../..');
 const today = require('../../lib/today');
 // const defaults = require('../defaults');

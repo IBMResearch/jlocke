@@ -13,7 +13,7 @@ const isV6 = require('net').isIPv6;
 
 const elastic = require('elasticsearch');
 const ipaddr = require('ipaddr.js');
-const dbg = require('debug')('jlocke-express-middleware');
+const dbg = require('debug')('jlocke');
 
 const defaults = require('./defaults');
 const ensureIndex = require('./lib/ensureIndex');

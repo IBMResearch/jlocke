@@ -1,14 +1,14 @@
-# jlocke-express-middleware
+# jLocke
 
-[![Continuos integration](https://travis-ci.org/IBMResearch/jlocke-express-middleware.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
+[![Continuos integration](https://travis-ci.org/IBMResearch/jlocke.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke)
 [![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b)
 
-Express middleware to store requests metadata to an [Elastic](https://www.elastic.co) instance. We use it in [JLocke](https://github.com/IBMResearch/jlocke) project and other internal ones.
+[Express](http://expressjs.com) metrics for friends. Based on [Elastic](https://www.elastic.co) and [Kibana](https://www.elastic.co/products/kibana).
 
 ## Install
 
 ```sh
-npm i --save jlocke-express-middleware
+npm i --save jlocke
 ```
 
 ## Use
@@ -55,7 +55,7 @@ Apart from the ones included by Express you can attach to the `req` the user ID 
 
 - `userId` (string) - User identifier.
 
-Example [here](https://github.com/IBMResearch/jlocke-express-middleware/blob/master/test/acceptance.js#L68).
+Example [here](https://github.com/IBMResearch/jlocke/blob/master/test/acceptance.js#L68).
 
 ## Developer guide
 
