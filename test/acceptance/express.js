@@ -106,7 +106,7 @@ describe('express()', () => {
     assert.equal(httpRes, 'Hello World!');
     dbg('HTTP request confirmed ...');
 
-    // The middleware write to the DB in async to avoid force the server
+    // The middleware writes to the DB in async to avoid force the server
     // to wait for these operation to answer more HTTP requests. So we have to
     // wait a bit here to let it finish.
     dbg('Waiting a bit ...');
