@@ -9,11 +9,21 @@ Apart from the provided dashboards, anyone can build new custom ones using that 
 
 ## Install
 
+### Library
+
 :coffee:
 
 ```sh
 npm i --save jlocke
 ```
+
+### Elastic & Kibana
+
+Use your own deployments. If you need a quick way of setup Kibana to give it a try you could use [this repo](https://github.com/IBMResearch/quickbana).
+
+#### Dashboard
+
+To avoid replacing the active dashboard the default one is available [here](https://github.com/IBMResearch/jlocke/tree/master/kibana) but not loaded. So you need to import it manually.
 
 ## Use
 
