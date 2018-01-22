@@ -10,7 +10,7 @@
 
 const assert = require('assert');
 
-// const dbg = require('debug')('jlocke-express-middleware:test:unit');
+// const dbg = require('debug')('jlocke:test:unit');
 const today = require('../../lib/today');
 
 

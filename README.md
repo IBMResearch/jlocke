@@ -1,28 +1,29 @@
-# jlocke-express-middleware
+# jLocke
 
-[![Continuos integration](https://travis-ci.org/IBMResearch/jlocke-express-middleware.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke-express-middleware)
+[![Continuos integration](https://travis-ci.org/IBMResearch/jlocke.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke)
 [![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b)
 
-Express middleware to store requests metadata to an [Elastic](https://www.elastic.co) instance. We use it in [JLocke](https://github.com/IBMResearch/jlocke) project and other internal ones.
+[Express.js](http://expressjs.com) analytics for friends based on [Elastic](https://www.elastic.co) and [Kibana](https://www.elastic.co/products/kibana). The idea is to monitor the API since the first moment with a quick setup instead of having to define anything in advance (ie: traits).
+
+Apart from the provided dashboards, anyone can build new custom ones using that stored info. Error reporting is also supported, to relate them with the requests data we have.
 
 ## Install
 
+:coffee:
+
 ```sh
-npm i --save jlocke-express-middleware
+npm i --save jlocke
 ```
 
 ## Use
 
-Please visit [the tests](./test) to see a full example. NOTES:
-
-- The "bodyParser" should be attached before the middleware to capture the body of the POST requests.
-- Routes need to be defined after connecting this middleware to Express.
+:rocket: Please visit [the tests](./test) to see a full example.
 
 ### async `jLocke.init(uri, opts)` -> Promise
 
 The middleware setup expects:
 
-- `uri` (string) - The database uri to connect to.
+- `uri` (string) - The Elastic URI to connect to.
 - `opts` (object) - DB optional values:
   - `trace` (boolean) - To enable Elastic tracing. (default: false)
   - `indexRequests` (string) - Name of the Elastic index to store the requests info. (default: "api-requests-MM-DD-YYY")
@@ -49,14 +50,19 @@ To track the Express requests info. The middleware expects to receive the next p
     - `path` (string) - The substring of the path to exlude stuff (ie: "login").
     - `field` (string) - Name of the object field to exclude (ie: "password").
 
+NOTES:
+
+- The "bodyParser" should be attached before this to capture the body of the POST requests.
+- The routes need to be defined after connecting this middleware.
+
 #### Adding more parameters
 
 Apart from the ones included by Express you can attach to the `req` the user ID to allow tracing:
 
 - `userId` (string) - User identifier.
 
-Example [here](https://github.com/IBMResearch/jlocke-express-middleware/blob/master/test/acceptance.js#L68).
+Example [here](https://github.com/IBMResearch/jlocke/blob/master/test/acceptance.js#L68).
 
 ## Developer guide
 
-Please check [this link](https://github.com/QISKit/qiskit-sdk-js/blob/master/CONTRIBUTING.md) before a contribution.
+:sunglasses: If you want to help please check [this](https://github.com/QISKit/qiskit-sdk-js/blob/master/CONTRIBUTING.md).

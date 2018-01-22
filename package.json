@@ -1,19 +1,21 @@
 {
-  "name": "jlocke-express-middleware",
-  "description": "Express middleware to store requests metadata into a Elastic.",
-  "version": "0.0.15",
+  "name": "jlocke",
+  "description": "Express.js analytics for friends.",
+  "version": "0.0.16",
   "author": {
     "name": "IBM Research - Science & Solutions team",
     "email": "isf@zurich.ibm.com"
   },
   "contributors": [
-    "https://github.com/IBMResearch/jlocke-express-middleware/graphs/contributors"
+    "https://github.com/IBMResearch/jlocke/graphs/contributors"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/IBMResearch/jlocke-express-middleware/jlocke-express-middleware.git"
+    "url": "https://github.com/IBMResearch/jlocke/jlocke.git"
   },
   "keywords": [
+    "monitoring",
+    "metrics",
     "loopback",
     "express",
     "middleware",
@@ -23,13 +25,10 @@
     "IBM",
     "elastic",
     "elasticsearch",
-    "jlocke",
-    "IDS",
-    "web",
-    "firewall"
+    "kibana"
   ],
   "bugs": {
-    "url": "https://github.com/IBMResearch/jlocke-express-middleware/issues"
+    "url": "https://github.com/IBMResearch/jlocke/issues"
   },
   "scripts": {
     "start": "node bin",
