@@ -1,9 +1,9 @@
 # jLocke
 
 [![Continuos integration](https://travis-ci.org/IBMResearch/jlocke.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke)
-[![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/4b853cee-b5b6-48e6-a5c8-4d1205fa095b)
+[![NSP Status](https://nodesecurity.io/orgs/ibmresearch/projects/b02fc6c6-dc9f-4a5a-8f1c-63b0d88768e7/badge)](https://nodesecurity.io/orgs/ibmresearch/projects/b02fc6c6-dc9f-4a5a-8f1c-63b0d88768e7)
 
-[Express.js](http://expressjs.com) analytics for friends based on [Elastic](https://www.elastic.co) and [Kibana](https://www.elastic.co/products/kibana). The idea is to monitor the API since the first moment with a quick setup instead of having to define anything in advance (ie: traits).
+[Express.js](http://expressjs.com) analytics for friends, based on [Elastic](https://www.elastic.co) and [Kibana](https://www.elastic.co/products/kibana). The idea is to monitor the API since the first moment with a quick setup, instead of having to define anything in advance (ie: traits).
 
 Apart from the provided dashboards, anyone can build new custom ones using that stored info. Error reporting is also supported, to relate them with the requests data we have.
 
