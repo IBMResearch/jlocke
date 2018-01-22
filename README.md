@@ -73,9 +73,7 @@ Apart from the ones included by Express you can attach to the `req` the user ID 
 
 Example [here](https://github.com/IBMResearch/jlocke/blob/master/test/acceptance.js#L70).
 
-In the same wat, to support the `duration` field (ms.) you need to attach the ["response-time"](https://github.com/expressjs/response-time) middleware before with the option "suffix" set to false. Please notice that it should be the first one to get more accurate results.
-
-Example [here](https://github.com/IBMResearch/jlocke/blob/master/test/acceptance.js#L74).
+In the same wat, to support the `duration` field (ms.) you need to attach the ["response-time"](https://github.com/expressjs/response-time) middleware before with the option "suffix" set to false. Please notice that it should be the first one to get more accurate results. Example [here](https://github.com/IBMResearch/jlocke/blob/master/test/acceptance.js#L74).
 
 ## Developer guide
 
