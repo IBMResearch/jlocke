@@ -1,6 +1,6 @@
 {
   "name": "jlocke",
-  "description": "Express metric for friends.",
+  "description": "Express.js analytics for friends.",
   "version": "0.0.16",
   "author": {
     "name": "IBM Research - Science & Solutions team",
