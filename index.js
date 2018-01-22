@@ -158,8 +158,16 @@ module.exports.express = (opts = {}) =>
     }
 
     // We need to wait for the route to finish to get the correct statusCode.
+    // https://nodejs.org/api/http.html#http_event_finish
     res.on('finish', () => {
       dbg('Request ended');
+
+      const duration = res.getHeader('X-Response-Time');
+      // The user could not attach the middleware "response-time"
+      if (duration) {
+        dbg('Duration included:', { duration });
+        reqInfo.duration = duration;
+      }
 
       reqInfo.responseCode = res.statusCode;
 

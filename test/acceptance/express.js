@@ -17,6 +17,7 @@ const bodyParser = require('body-parser');
 const elastic = require('elasticsearch');
 const makeReq = require('request-promise-native');
 const sleep = require('system-sleep');
+const responseTime = require('response-time');
 /* eslint-enable import/no-extraneous-dependencies */
 
 const dbg = require('debug')('jlocke:test:acceptance');
@@ -66,8 +67,8 @@ describe('express()', () => {
       .then(() => {
         const app = express();
 
+        app.use(responseTime({ suffix: false }));
         app.use(bodyParser.json());
-
         // To save also the "userId" field.
         // Probably you need something in runtime here.
         app.use((req, res, next) => {
@@ -101,7 +102,7 @@ describe('express()', () => {
   it('should save all data when non hidden fields', async () => {
     dbg('Making the HTTP request ...');
     const httpRes = await makeReq(`${uriServer}${pathBase}`);
-    dbg('HTTP request done');
+    dbg('HTTP request done', httpRes);
 
     assert.equal(httpRes, 'Hello World!');
     dbg('HTTP request confirmed ...');
@@ -129,6 +130,7 @@ describe('express()', () => {
     assert.equal(body.hits.hits[0]._source.path, pathBase);
     assert.equal(body.hits.hits[0]._source.method, 'GET');
     assert.equal(body.hits.hits[0]._source.protocol, 'http');
+    assert.equal(typeof parseFloat(body.hits.hits[0]._source.duration), 'number');
     assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
     assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
     assert.equal(body.hits.hits[0]._source.originalUrl, pathBase);
