@@ -76,7 +76,7 @@ describe('express()', () => {
           next();
         });
         app.use(jLocke.express({
-          path: 'api',
+          only: 'api',
           hide: { path: excludePath, field: excludeField },
         }));
 

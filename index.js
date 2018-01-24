@@ -114,7 +114,7 @@ module.exports.express = (opts = {}) =>
     }
 
     // "originalUrl" is unique always present (vs "path" and "baseUrl").
-    if (opts.path && req.originalUrl.indexOf(opts.path) === -1) {
+    if (opts.only && req.originalUrl.indexOf(opts.only) === -1) {
       // We don't want to debug the originalUrl because it includes the user token.
       dbg('Request not logged (hidden path)', { path: req.path, baseUrl: req.baseUrl });
       return;
