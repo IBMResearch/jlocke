@@ -33,14 +33,14 @@ const typeErrors = 'testErr';
 dbg(`Starting, initing the DB connection: ${url}`);
 const db = new elastic.Client({
   host: url,
-  log: 'trace',
+  // log: 'trace',
 });
 
 
 describe('error()', () => {
   before(async () => {
     await jLocke.init(url, {
-      trace: true,
+      // trace: true,
       indexRequests: index,
       typeRequests: type,
       indexErrors,
@@ -71,14 +71,11 @@ describe('error()', () => {
     // Only cheking some of them to KISS.
     assert.equal(result.timed_out, false);
     assert.equal(result.hits.total, 1);
-    assert.equal(result.hits.max_score, 1);
-    assert.equal(result.hits.hits.length, 1);
     /* eslint-disable no-underscore-dangle */
     assert.equal(result.hits.hits[0]._index, indexErrorsFull);
     assert.equal(result.hits.hits[0]._type, typeErrors);
     assert.equal(typeof result.hits.hits[0]._id, 'string');
     assert.equal(result.hits.hits[0]._id.length, 20);
-    assert.equal(result.hits.hits[0]._score, 1);
     assert.equal(result.hits.hits[0]._source.message, errMsgCustom);
     assert.equal(result.hits.hits[0]._source.errorMessage, errMsg);
     assert.equal(typeof result.hits.hits[0]._source.errorStack, 'string');

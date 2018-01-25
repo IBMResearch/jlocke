@@ -33,7 +33,7 @@
   "scripts": {
     "start": "node bin",
     "test-unit": "mocha test/unit",
-    "test-acceptance": "mocha --timeout 60000 test/acceptance",
+    "test-acceptance": "mocha --timeout 15000 test/acceptance",
     "test": "npm run test-unit && npm run test-acceptance",
     "lint": "eslint .",
     "dep-ok": "npm-check",

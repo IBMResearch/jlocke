@@ -57,8 +57,9 @@ To track the Express requests info. The middleware expects to receive the next p
 - `opts` (object) - Optional values:
   - `only` (string) - To store only the requests through this subpath. (default: null)
   - `hide` (object) - To avoid to store sensitive data in the DB for a POST route. (default: {})
-    - `path` (string) - The substring of the path to exlude stuff (ie: "login").
-    - `field` (string) - Name of the object field to exclude (ie: "password").
+    - `path` (string) - The substring of the path to exlude stuff (ie: "login"). If it's not defined but the others do all paths will be hidden.
+    - `field` (string) - Name of the object field to exclude (ie: "password"). Same here, if it's not defined but the others do all the body content will be hidden.
+    - `fun` (async function) - Custom function to hide all the content of specific requests. It should return a boolean and receives de Express [request](http://expressjs.com/en/api.html#req) object as parameter. In this case it's defined the other two options are ignored.
 
 NOTES:
 

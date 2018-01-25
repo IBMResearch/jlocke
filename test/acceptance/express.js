@@ -41,14 +41,16 @@ const uriServer = `http://127.0.0.1:${port}`;
 const pathBase = '/api';
 const pathLogin = `${pathBase}/login`;
 const pathHidden = '/hidden';
-
+const searchOpts = { index: indexFull, type, sort: ['timestamp:desc'] };
+let defineFun = false;
 let server;
+let reqLogin;
 
 
 dbg(`Starting, initing the DB connection: ${url}`);
 const db = new elastic.Client({
   host: url,
-  log: 'trace',
+  // log: 'trace',
 });
 
 
@@ -56,9 +58,9 @@ describe('express()', () => {
   // TODO: Not working.
   // before(async () => {
   // beforeEach(async () => {
-  before((done) => {
+  beforeEach((done) => {
     jLocke.init(url, {
-      trace: true,
+      // trace: true,
       indexRequests: index,
       typeRequests: type,
       indexErrors,
@@ -75,14 +77,21 @@ describe('express()', () => {
           req.userId = (() => testUserId)();
           next();
         });
-        app.use(jLocke.express({
+        const opts = {
           only: 'api',
           hide: { path: excludePath, field: excludeField },
-        }));
+        };
+
+        if (defineFun) { opts.hide.fun = () => true; }
+
+        app.use(jLocke.express(opts));
 
         app.get(pathBase, (req, res) => res.send('Hello World!'));
         app.post(pathLogin, (req, res) => res.send({ username: 'test', token: 'aaa' }));
         app.get(pathHidden, (req, res) => res.send('Hello hidden!'));
+
+        // Lets give a time to end the index creation.
+        sleep(10000);
 
         dbg('Starting the Express server ...');
         // TODO: Not working.
@@ -91,15 +100,13 @@ describe('express()', () => {
         server = app.listen(port, () => {
           dbg(`Example app listening on port: ${port}`);
 
-          // Lets give a time to end the index creation.
-          sleep(10000);
           done();
         });
       });
   });
 
 
-  it('should save all data when non hidden fields', async () => {
+  it('should save all data for non hidden fields', async () => {
     dbg('Making the HTTP request ...');
     const httpRes = await makeReq(`${uriServer}${pathBase}`);
     dbg('HTTP request done', httpRes);
@@ -114,19 +121,16 @@ describe('express()', () => {
     sleep(10000);
 
     dbg('Checking the saved stuff ...');
-    const body = await db.search({ index: indexFull, type });
+    const body = await db.search(searchOpts);
     dbg('Response got:', body);
     // Only cheking some of them to KISS.
     assert.equal(body.timed_out, false);
     assert.equal(body.hits.total, 1);
-    assert.equal(body.hits.max_score, 1);
-    assert.equal(body.hits.hits.length, 1);
     /* eslint-disable no-underscore-dangle */
     assert.equal(body.hits.hits[0]._index, indexFull);
     assert.equal(body.hits.hits[0]._type, type);
     assert.equal(typeof body.hits.hits[0]._id, 'string');
     assert.equal(body.hits.hits[0]._id.length, 20);
-    assert.equal(body.hits.hits[0]._score, 1);
     assert.equal(body.hits.hits[0]._source.path, pathBase);
     assert.equal(body.hits.hits[0]._source.method, 'GET');
     assert.equal(body.hits.hits[0]._source.protocol, 'http');
@@ -134,55 +138,17 @@ describe('express()', () => {
     assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
     assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
     assert.equal(body.hits.hits[0]._source.originalUrl, pathBase);
-    // Elastic returns it as an string.
+    // // Elastic returns it as an string.
     assert.equal(typeof body.hits.hits[0]._source.timestamp, 'string');
     assert.equal(body.hits.hits[0]._source.responseCode, 200);
     assert.equal(body.hits.hits[0]._source.userId, testUserId);
     /* eslint-enable no-underscore-dangle */
+
+    server.close();
   });
 
 
-  it('should hide desired fields for POSTs', async () => {
-    dbg('Making the HTTP request ...');
-    const reqOpts = {
-      uri: `${uriServer}${pathLogin}`,
-      method: 'POST',
-      body: { username: testUser, password: 'kase' },
-      json: true,
-    };
-
-    await makeReq(reqOpts);
-    dbg('HTTP request done', reqOpts);
-
-    dbg('Waiting a bit ...');
-    sleep(10000);
-
-    dbg('Checking the saved stuff ...');
-    const body = await db.search({ index: indexFull, type });
-    dbg('Response got:', body);
-    // Only cheking some of them to KISS.
-    assert.equal(body.timed_out, false);
-    assert.equal(body.hits.total, 2);
-    assert.equal(body.hits.hits.length, 2);
-
-    const [item1, item2] = body.hits.hits;
-    // Order is not guaranteed.
-    let newItem = item1;
-    /* eslint-disable no-underscore-dangle */
-    if (item2._source.path === pathLogin) {
-      newItem = item2;
-    }
-    assert.equal(newItem._source.path, pathLogin);
-    assert.equal(newItem._source.method, 'POST');
-    assert.equal(newItem._source.body[excludeField], undefined);
-    assert.equal(newItem._source.body.username, testUser);
-    /* eslint-enable no-underscore-dangle */
-
-    dbg('Express service stopped');
-  });
-
-
-  it('should only inspect not hidden subpaths (if any)', async () => {
+  it('should only inspect not hidden subpaths (if "path")', async () => {
     dbg('Making the HTTP request ...');
     await makeReq(`${uriServer}${pathHidden}`);
     dbg('HTTP request done');
@@ -191,13 +157,75 @@ describe('express()', () => {
     sleep(10000);
 
     dbg('Checking the saved stuff ...');
-    const body = await db.search({ index: indexFull, type });
+    const body = await db.search(searchOpts);
     dbg('Response got:', body);
     assert.equal(body.timed_out, false);
-    assert.equal(body.hits.total, 2);
+    assert.equal(body.hits.total, 1);
     /* eslint-enable no-underscore-dangle */
 
     server.close();
-    dbg('Express service stopped');
+  });
+
+
+  it('should hide desired fields for POSTs (if "hide")', async () => {
+    dbg('Making the HTTP request ...');
+    reqLogin = {
+      uri: `${uriServer}${pathLogin}`,
+      method: 'POST',
+      body: { username: 'ola', password: 'kase' },
+      json: true,
+    };
+
+    await makeReq(reqLogin);
+    dbg('HTTP request done', reqLogin);
+
+    dbg('Waiting a bit ...');
+    sleep(10000);
+
+    dbg('Checking the saved stuff ...');
+    const body = await db.search(searchOpts);
+    dbg('Response got:', body);
+    // Only cheking some of them to KISS.
+    assert.equal(body.timed_out, false);
+    assert.equal(body.hits.total, 2);
+    assert.equal(body.hits.hits.length, 2);
+
+    const item = body.hits.hits[0];
+    /* eslint-disable no-underscore-dangle */
+    assert.equal(item._source.path, pathLogin);
+    assert.equal(item._source.method, 'POST');
+    assert.equal(item._source.body[excludeField], undefined);
+    assert.equal(item._source.body.username, testUser);
+    /* eslint-enable no-underscore-dangle */
+
+    server.close();
+
+    // Ready for the next test.
+    defineFun = true;
+  });
+
+
+  it('should only have "fun" into account (if defined)', async () => {
+    dbg('Making the HTTP request ...');
+    await makeReq(reqLogin);
+    dbg('HTTP request done', reqLogin);
+
+    dbg('Waiting a bit ...');
+    sleep(10000);
+
+    dbg('Checking the saved stuff ...');
+    const body = await db.search(searchOpts);
+    dbg('Response got:', body);
+    assert.equal(body.timed_out, false);
+    assert.equal(body.hits.total, 3);
+
+    const item = body.hits.hits[0];
+    /* eslint-disable no-underscore-dangle */
+    assert.equal(item._source.path, pathLogin);
+    assert.equal(item._source.method, 'POST');
+    assert.equal(item._source.body, undefined);
+    /* eslint-enable no-underscore-dangle */
+
+    server.close();
   });
 });

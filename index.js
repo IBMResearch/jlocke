@@ -147,9 +147,50 @@ module.exports.express = (opts = {}) =>
       reqInfo.params = req.param;
       dbg('Parameters found:', req.params);
     }
-    if (req.body && Object.keys(req.body).length > 0) {
+
+    // Adding the body.
+    if (
+      req.method === 'POST' && // only affects to POSTs
+      req.body && Object.keys(req.body).length > 0 // with non empty body
+    ) {
       reqInfo.body = req.body;
-      dbg('Body found:', req.body);
+      // Hiding the options (if "hide")
+      // path    field     fun
+      // No       No       Yes -> Hide full body for all paths if fun
+      // Yes      No       No  -> Hide full body for this path
+      // Yes      No       Yes -> Hide full body for this path if fun
+
+      // No       Yes      No  -> Hide field for all paths
+      // No       Yes      Yes -> Hide field for all paths if fun
+      // Yes      Yes      No  -> Hide field for this path
+      // Yes      Yes      Yes -> Hide field for this path if fun
+      if (opts.hide) {
+        const hideFun = (opts.hide.fun && opts.hide.fun(req));
+        const hidePath = (opts.hide.path && reqInfo.path.indexOf(opts.hide.path) !== -1);
+
+        dbg('To hide:', { hidePath, hideFun });
+        if (
+          hideFun || // fun has priority
+          (!opts.hide.field && (!opts.hide.path || hidePath))) { // "hide.field" not present
+          dbg('Deleting body');
+
+          // TODO: Try to avoid this delete to improve performance.
+          delete reqInfo.body; // "Hide full body"
+        } else {
+          dbg('Checking if we need to delete any field');
+          const hideField = (opts.hide.field && reqInfo.body[opts.hide.field]);
+
+          // Dropping specific fields.
+          if (
+            hideField && // only if field name matches.
+            (!opts.hide.path || hidePath)
+          ) {
+            dbg(`Dropping hidden field: ${opts.hide.field}`);
+
+            delete reqInfo.body[opts.hide.field];
+          }
+        }
+      }
     }
 
     if (req.userId) {
@@ -171,14 +212,6 @@ module.exports.express = (opts = {}) =>
 
       reqInfo.responseCode = res.statusCode;
 
-      // Hiding the options (if any)
-      if (reqInfo.method === 'POST' &&
-          opts.hide && opts.hide.path &&
-        (reqInfo.path.indexOf(opts.hide.path) !== -1) &&
-        opts.hide.field && reqInfo.body && reqInfo.body[opts.hide.field]) {
-        dbg(`Dropping hidden field: ${opts.hide.field}`);
-        delete reqInfo.body[opts.hide.field];
-      }
 
       dbg('Inserting found request data in the DB', { reqInfo, indexRequests, typeRequests });
       // TODO: Add pipelining
