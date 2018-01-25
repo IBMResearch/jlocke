@@ -14,6 +14,7 @@ const isV6 = require('net').isIPv6;
 const elastic = require('elasticsearch');
 const ipaddr = require('ipaddr.js');
 const dbg = require('debug')('jlocke');
+const lodash = require('lodash');
 
 const defaults = require('./defaults');
 const ensureIndex = require('./lib/ensureIndex');
@@ -100,8 +101,28 @@ module.exports.error = async (message, error, opts = {}) => {
 
 
 // eslint-disable-next-line arrow-body-style
-module.exports.express = (opts = {}) =>
-  (req, res, next) => {
+module.exports.express = (opts = {}) => {
+  dbg('Checking the passed options');
+
+  let only;
+  if (opts.only) {
+    if (typeof opts.only !== 'string' && !lodash.isArray(opts.only)) {
+      throw new Error('"only" should be string or array');
+    }
+
+    // Array or string supported.
+    // eslint-disable-next-line prefer-destructuring
+    only = opts.only;
+    if (typeof only === 'string') { only = [only]; }
+  }
+
+  if (opts.hide && (typeof opts.hide !== 'object')) {
+    throw new Error('"hide" should be an object');
+  }
+
+  // TODO: Add also checks for subfields.
+
+  return (req, res, next) => {
     dbg('New request');
 
     // We don't want to wait until the DB write is done to keep answering to more HTTP requests.
@@ -114,10 +135,19 @@ module.exports.express = (opts = {}) =>
     }
 
     // "originalUrl" is unique always present (vs "path" and "baseUrl").
-    if (opts.only && req.originalUrl.indexOf(opts.only) === -1) {
+    if (only) {
+      const matchAny = !lodash.some(only, (itemOnly) => {
+        if (only && req.originalUrl.indexOf(itemOnly) === -1) {
+          return true;
+        }
+
+        return false;
+      });
+
       // We don't want to debug the originalUrl because it includes the user token.
-      dbg('Request not logged (hidden path)', { path: req.path, baseUrl: req.baseUrl });
-      return;
+      dbg('Request checked (hidden path)', { path: req.path, baseUrl: req.baseUrl, matchAny });
+
+      if (!matchAny) { return; }
     }
 
     const reqInfo = {
@@ -220,3 +250,4 @@ module.exports.express = (opts = {}) =>
         .catch((err) => { throw Error(`Adding the requests info: ${err.message}`); });
     });
   };
+};

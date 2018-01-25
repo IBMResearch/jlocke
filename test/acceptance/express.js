@@ -79,6 +79,7 @@ describe('express()', () => {
         });
         const opts = {
           only: 'api',
+          // only: ['api'], // also supported
           hide: { path: excludePath, field: excludeField },
         };
 

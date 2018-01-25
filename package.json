@@ -44,7 +44,8 @@
   "dependencies": {
     "debug": "^3.1.0",
     "elasticsearch": "^14.0.0",
-    "ipaddr.js": "^1.5.4"
+    "ipaddr.js": "^1.5.4",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "body-parser": "^1.15.2",

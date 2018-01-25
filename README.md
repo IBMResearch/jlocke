@@ -55,7 +55,7 @@ To track the errors, ie: uncaughException, unhandledPromise. The middleware setu
 To track the Express requests info. The middleware expects to receive the next parameters. Please visit [the tests](./test) for more details.
 
 - `opts` (object) - Optional values:
-  - `only` (string) - To store only the requests through this subpath. (default: null)
+  - `only` (string / array) - To store only the requests through this subpath. (default: null)
   - `hide` (object) - To avoid to store sensitive data in the DB for a POST route. (default: {})
     - `path` (string) - The substring of the path to exlude stuff (ie: "login"). If it's not defined but the others do all paths will be hidden.
     - `field` (string) - Name of the object field to exclude (ie: "password"). Same here, if it's not defined but the others do all the body content will be hidden.
