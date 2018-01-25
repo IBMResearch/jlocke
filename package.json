@@ -1,7 +1,7 @@
 {
   "name": "jlocke",
   "description": "Express.js analytics for friends.",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "author": {
     "name": "IBM Research - Science & Solutions team",
     "email": "isf@zurich.ibm.com"
