@@ -15,6 +15,7 @@ const elastic = require('elasticsearch');
 const ipaddr = require('ipaddr.js');
 const dbg = require('debug')('jlocke');
 const lodash = require('lodash');
+const isPromise = require('is-promise');
 
 const defaults = require('./defaults');
 const ensureIndex = require('./lib/ensureIndex');
@@ -29,6 +30,15 @@ let indexRequests;
 let typeRequests;
 let indexErrors;
 let typeErrors;
+
+
+function sendToDb(index, type, body) {
+  dbg('Inserting found request data in the DB', { index, type, body });
+  // TODO: Add pipelining
+  db.index({ index, type, body })
+    .then(() => dbg('New request info correctly inserted'))
+    .catch((err) => { throw Error(`Adding the requests info: ${err.message}`); });
+}
 
 
 module.exports.init = async (uri, opts = {}) => {
@@ -120,6 +130,9 @@ module.exports.express = (opts = {}) => {
     throw new Error('"hide" should be an object');
   }
 
+  if (opts.hide.fun && (typeof opts.hide.fun !== 'function' || isPromise(opts.hide.fun))) {
+    throw new Error('"hide" should be a function or a promise');
+  }
   // TODO: Add also checks for subfields.
 
   return (req, res, next) => {
@@ -178,34 +191,76 @@ module.exports.express = (opts = {}) => {
       dbg('Parameters found:', req.params);
     }
 
-    // Adding the body.
-    if (
-      req.method === 'POST' && // only affects to POSTs
-      req.body && Object.keys(req.body).length > 0 // with non empty body
-    ) {
-      reqInfo.body = req.body;
-      // Hiding the options (if "hide")
-      // path    field     fun
-      // No       No       Yes -> Hide full body for all paths if fun
-      // Yes      No       No  -> Hide full body for this path
-      // Yes      No       Yes -> Hide full body for this path if fun
+    if (req.userId) {
+      reqInfo.userId = req.userId;
+      dbg(`UserId passed: ${req.userId}`);
+    }
 
-      // No       Yes      No  -> Hide field for all paths
-      // No       Yes      Yes -> Hide field for all paths if fun
-      // Yes      Yes      No  -> Hide field for this path
-      // Yes      Yes      Yes -> Hide field for this path if fun
-      if (opts.hide) {
-        const hideFun = (opts.hide.fun && opts.hide.fun(req));
+    // We need to wait for the route to finish to get the correct statusCode and response time.
+    // https://nodejs.org/api/http.html#http_event_finish
+    res.on('finish', () => {
+      dbg('Request ended');
+
+      const duration = res.getHeader('X-Response-Time');
+      // The user could not attach the middleware "response-time"
+      if (duration) {
+        dbg('Duration included:', { duration });
+        reqInfo.duration = duration;
+      }
+      reqInfo.responseCode = res.statusCode;
+
+      // Adding the body.
+      if (
+        (!req.body || Object.keys(req.body).length < 1) || // with non empty body
+        !opts.hide
+      ) {
+        dbg('No "hide" or no body, sending ...');
+        sendToDb(indexRequests, typeRequests, reqInfo);
+      } else {
+        reqInfo.body = req.body;
+
+        // Hiding the options (if "hide")
+        // We use async stuff here so better inside this callback to
+        // avoid a mess.
+        // path    field     fun
+        // No       No       Yes -> Hide full body for all paths if fun
+        // Yes      No       No  -> Hide full body for this path
+        // Yes      No       Yes -> Hide full body for this path if fun
+        // No       Yes      No  -> Hide field for all paths
+        // No       Yes      Yes -> Hide field for all paths if fun
+        // Yes      Yes      No  -> Hide field for this path
+        // Yes      Yes      Yes -> Hide field for this path if fun
         const hidePath = (opts.hide.path && reqInfo.path.indexOf(opts.hide.path) !== -1);
 
-        dbg('To hide:', { hidePath, hideFun });
-        if (
-          hideFun || // fun has priority
-          (!opts.hide.field && (!opts.hide.path || hidePath))) { // "hide.field" not present
+        if (opts.hide.fun) {
+          let condPromise = opts.hide.fun(req);
+          dbg('To hide (path):', { hidePath });
+
+          if (!isPromise(condPromise)) { condPromise = Promise.resolve(condPromise); }
+
+          condPromise
+            .then((hideFun) => {
+              dbg('To hide (fun):', { hideFun });
+
+              dbg('Deleting body');
+              // TODO: Try to avoid this delete to improve performance.
+              delete reqInfo.body; // "Hide full body"
+              sendToDb(indexRequests, typeRequests, reqInfo);
+            })
+            .catch((err) => {
+              // eslint-disable-next-line no-console
+              console.error('Running the "hide.fun" promise, not storing' +
+                            'the data due to privacy reasons', err);
+            });
+        } else if (
+          !opts.hide.field && // "hide.field" not present
+          (!opts.hide.path || hidePath) // "path" is not blocking
+        ) {
           dbg('Deleting body');
 
           // TODO: Try to avoid this delete to improve performance.
-          delete reqInfo.body; // "Hide full body"
+          delete reqInfo.body;
+          sendToDb(indexRequests, typeRequests, reqInfo);
         } else {
           dbg('Checking if we need to delete any field');
           const hideField = (opts.hide.field && reqInfo.body[opts.hide.field]);
@@ -219,35 +274,9 @@ module.exports.express = (opts = {}) => {
 
             delete reqInfo.body[opts.hide.field];
           }
+          sendToDb(indexRequests, typeRequests, reqInfo);
         }
       }
-    }
-
-    if (req.userId) {
-      reqInfo.userId = req.userId;
-      dbg(`UserId passed: ${req.userId}`);
-    }
-
-    // We need to wait for the route to finish to get the correct statusCode.
-    // https://nodejs.org/api/http.html#http_event_finish
-    res.on('finish', () => {
-      dbg('Request ended');
-
-      const duration = res.getHeader('X-Response-Time');
-      // The user could not attach the middleware "response-time"
-      if (duration) {
-        dbg('Duration included:', { duration });
-        reqInfo.duration = duration;
-      }
-
-      reqInfo.responseCode = res.statusCode;
-
-
-      dbg('Inserting found request data in the DB', { reqInfo, indexRequests, typeRequests });
-      // TODO: Add pipelining
-      db.index({ index: indexRequests, type: typeRequests, body: reqInfo })
-        .then(() => dbg('New request info correctly inserted'))
-        .catch((err) => { throw Error(`Adding the requests info: ${err.message}`); });
     });
   };
 };

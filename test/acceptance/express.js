@@ -79,11 +79,14 @@ describe('express()', () => {
         });
         const opts = {
           only: 'api',
+          // TODO: Add a test for this.
           // only: ['api'], // also supported
           hide: { path: excludePath, field: excludeField },
         };
 
-        if (defineFun) { opts.hide.fun = () => true; }
+        // TODO: Add a test for this.
+        // if (defineFun) { opts.hide.fun = () => true; }
+        if (defineFun) { opts.hide.fun = () => Promise.resolve(true); }
 
         app.use(jLocke.express(opts));
 
@@ -113,7 +116,7 @@ describe('express()', () => {
     dbg('HTTP request done', httpRes);
 
     assert.equal(httpRes, 'Hello World!');
-    dbg('HTTP request confirmed ...');
+    dbg('HTTP request confirmed ...', {});
 
     // The middleware writes to the DB in async to avoid force the server
     // to wait for these operation to answer more HTTP requests. So we have to
