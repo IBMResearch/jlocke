@@ -69,7 +69,7 @@ module.exports.init = async (uri, opts = {}) => {
   try {
     await Promise.all([
       ensureIndex(db, indexRequests, typeRequests, 'request'),
-      // ensureIndex(db, indexErrors, typeErrors, 'error'),
+      ensureIndex(db, indexErrors, typeErrors, 'error'),
     ]);
   } catch (err) {
     throw Error(`Creating the indexes: ${err.message}`);
