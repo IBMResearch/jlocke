@@ -57,9 +57,10 @@ module.exports.init = async (uri, opts = {}) => {
 
   // Each new deploy indexes are created including the date in the name.
   // We can't do it for each day in run time due to performance reasons.
-  indexRequests = `${opts.indexRequests || defaults.indexes.api.name}-${today()}`;
+  const todayStr = today();
+  indexRequests = `${opts.indexRequests || defaults.indexes.api.name}-${todayStr}`;
   typeRequests = opts.typeRequests || defaults.indexes.api.type;
-  indexErrors = `${opts.indexErrors || defaults.indexes.error.name}-${today()}`;
+  indexErrors = `${opts.indexErrors || defaults.indexes.error.name}-${todayStr}`;
   typeErrors = opts.typeErrors || defaults.indexes.error.type;
 
   dbg('Creating proper indexes', {
