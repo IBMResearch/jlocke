@@ -127,9 +127,14 @@ module.exports.express = (opts = {}) => {
     if (typeof only === 'string') { only = [only]; }
   }
 
-  if (opts.hide && (typeof opts.hide !== 'object')) {
+  // To keep backward compatibility.
+  // eslint-disable-next-line no-param-reassign
+  if (!opts.hideBody && opts.hide) { opts.hideBody = opts.hide; }
+
+  if (opts.hideBody && (typeof opts.hideBody !== 'object')) {
     throw new Error('"hide" should be an object');
   }
+
 
   if (
     opts.hideBody.fun &&
