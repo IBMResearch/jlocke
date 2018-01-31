@@ -81,12 +81,11 @@ describe('express()', () => {
           only: 'api',
           // TODO: Add a test for this.
           // only: ['api'], // also supported
-          hide: { path: excludePath, field: excludeField },
+          hideBody: { path: excludePath, field: excludeField },
         };
-
         // TODO: Add a test for this.
-        // if (defineFun) { opts.hide.fun = () => true; }
-        if (defineFun) { opts.hide.fun = () => Promise.resolve(true); }
+        // if (defineFun) { opts.hideBody.fun = () => true; }
+        if (defineFun) { opts.hideBody.fun = () => Promise.resolve(true); }
 
         app.use(jLocke.express(opts));
 
@@ -112,10 +111,14 @@ describe('express()', () => {
 
   it('should save all data for non hidden fields', async () => {
     dbg('Making the HTTP request ...');
-    const httpRes = await makeReq(`${uriServer}${pathBase}`);
+    const agent = 'test-agent';
+    const httpRes = await makeReq(`${uriServer}${pathBase}`, {
+      headers: { 'User-Agent': agent },
+    });
     dbg('HTTP request done', httpRes);
 
     assert.equal(httpRes, 'Hello World!');
+    // TODO: Add a test for "dropTime" and check it here.
     dbg('HTTP request confirmed ...', {});
 
     // The middleware writes to the DB in async to avoid force the server
@@ -139,8 +142,8 @@ describe('express()', () => {
     assert.equal(body.hits.hits[0]._source.method, 'GET');
     assert.equal(body.hits.hits[0]._source.protocol, 'http');
     assert.equal(typeof parseFloat(body.hits.hits[0]._source.duration), 'number');
-    assert.equal(body.hits.hits[0]._source.headers.host, '127.0.0.1:7777');
-    assert.equal(body.hits.hits[0]._source.headers.connection, 'close');
+    assert.equal(body.hits.hits[0]._source.ip, '127.0.0.1');
+    assert.equal(body.hits.hits[0]._source.agent, agent);
     assert.equal(body.hits.hits[0]._source.originalUrl, pathBase);
     // // Elastic returns it as an string.
     assert.equal(typeof body.hits.hits[0]._source.timestamp, 'string');

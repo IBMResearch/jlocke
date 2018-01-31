@@ -131,16 +131,21 @@ module.exports.express = (opts = {}) => {
     throw new Error('"hide" should be an object');
   }
 
-  if (opts.hide.fun && (typeof opts.hide.fun !== 'function' || isPromise(opts.hide.fun))) {
+  if (
+    opts.hideBody.fun &&
+    (typeof opts.hideBody.fun !== 'function' || isPromise(opts.hideBody.fun))
+  ) {
     throw new Error('"hide" should be a function or a promise');
   }
   // TODO: Add also checks for subfields.
 
+
   return (req, res, next) => {
     dbg('New request');
 
-    // We don't want to wait until the DB write is done to keep answering to more HTTP requests.
+
     next();
+
 
     if (!indexReady) {
       // eslint-disable-next-line no-console
@@ -168,10 +173,13 @@ module.exports.express = (opts = {}) => {
       path: req.path,
       method: req.method,
       protocol: req.protocol,
-      headers: req.headers,
       originalUrl: req.originalUrl,
       timestamp: new Date(),
     };
+
+    if (req.headers['user-agent']) { reqInfo.agent = req.headers['user-agent']; }
+
+    if (opts.allHeaders) { reqInfo.headers = req.headers; }
 
     if (req.ip) {
       // TODO: Elastic only support v4 IP addresses, so we need to convert it.
@@ -197,30 +205,28 @@ module.exports.express = (opts = {}) => {
       dbg(`UserId passed: ${req.userId}`);
     }
 
-    // We need to wait for the route to finish to get the correct statusCode and response time.
+
+    // We need to wait for the route to finish to get the correct statusCode and duration.
     // https://nodejs.org/api/http.html#http_event_finish
     res.on('finish', () => {
       dbg('Request ended');
 
-      const duration = res.getHeader('X-Response-Time');
-      // The user could not attach the middleware "response-time"
-      if (duration) {
-        dbg('Duration included:', { duration });
-        reqInfo.duration = duration;
-      }
+      const duration = res.getHeader('x-response-time');
+      if (duration) { reqInfo.duration = duration; }
+
       reqInfo.responseCode = res.statusCode;
 
       // Adding the body.
       if (
         (!req.body || Object.keys(req.body).length < 1) || // with non empty body
-        !opts.hide
+        !opts.hideBody
       ) {
         dbg('No "hide" or no body, sending ...');
         sendToDb(indexRequests, typeRequests, reqInfo);
       } else {
         reqInfo.body = req.body;
 
-        // Hiding the options (if "hide")
+        // Hiding the options (if "hideBody")
         // We use async stuff here so better inside this callback to
         // avoid a mess.
         // path    field     fun
@@ -231,10 +237,10 @@ module.exports.express = (opts = {}) => {
         // No       Yes      Yes -> Hide field for all paths if fun
         // Yes      Yes      No  -> Hide field for this path
         // Yes      Yes      Yes -> Hide field for this path if fun
-        const hidePath = (opts.hide.path && reqInfo.path.indexOf(opts.hide.path) !== -1);
+        const hidePath = (opts.hideBody.path && reqInfo.path.indexOf(opts.hideBody.path) !== -1);
 
-        if (opts.hide.fun) {
-          let condPromise = opts.hide.fun(req);
+        if (opts.hideBody.fun) {
+          let condPromise = opts.hideBody.fun(req);
           dbg('To hide (path):', { hidePath });
 
           if (!isPromise(condPromise)) { condPromise = Promise.resolve(condPromise); }
@@ -254,8 +260,8 @@ module.exports.express = (opts = {}) => {
                             'the data due to privacy reasons', err);
             });
         } else if (
-          !opts.hide.field && // "hide.field" not present
-          (!opts.hide.path || hidePath) // "path" is not blocking
+          !opts.hideBody.field && // "hide.field" not present
+          (!opts.hideBody.path || hidePath) // "path" is not blocking
         ) {
           dbg('Deleting body');
 
@@ -264,16 +270,16 @@ module.exports.express = (opts = {}) => {
           sendToDb(indexRequests, typeRequests, reqInfo);
         } else {
           dbg('Checking if we need to delete any field');
-          const hideField = (opts.hide.field && reqInfo.body[opts.hide.field]);
+          const hideField = (opts.hideBody.field && reqInfo.body[opts.hideBody.field]);
 
           // Dropping specific fields.
           if (
             hideField && // only if field name matches.
-            (!opts.hide.path || hidePath)
+            (!opts.hideBody.path || hidePath)
           ) {
-            dbg(`Dropping hidden field: ${opts.hide.field}`);
+            dbg(`Dropping hidden field: ${opts.hideBody.field}`);
 
-            delete reqInfo.body[opts.hide.field];
+            delete reqInfo.body[opts.hideBody.field];
           }
           sendToDb(indexRequests, typeRequests, reqInfo);
         }
