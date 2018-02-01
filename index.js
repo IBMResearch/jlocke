@@ -131,17 +131,19 @@ module.exports.express = (opts = {}) => {
   // eslint-disable-next-line no-param-reassign
   if (!opts.hideBody && opts.hide) { opts.hideBody = opts.hide; }
 
-  if (opts.hideBody && (typeof opts.hideBody !== 'object')) {
-    throw new Error('"hide" should be an object');
+  if (opts.hideBody) {
+    if (typeof opts.hideBody !== 'object') {
+      throw new Error('"hide" should be an object');
+    }
+
+    if (
+      opts.hideBody.fun &&
+      (typeof opts.hideBody.fun !== 'function' || isPromise(opts.hideBody.fun))
+    ) {
+      throw new Error('"hide" should be a function or a promise');
+    }
   }
 
-
-  if (
-    opts.hideBody.fun &&
-    (typeof opts.hideBody.fun !== 'function' || isPromise(opts.hideBody.fun))
-  ) {
-    throw new Error('"hide" should be a function or a promise');
-  }
   // TODO: Add also checks for subfields.
 
 
