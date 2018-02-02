@@ -186,6 +186,9 @@ module.exports.express = (opts = {}) => {
 
     if (req.headers['user-agent']) { reqInfo.agent = req.headers['user-agent']; }
 
+    // TODO: If not optional add at the object creation.
+    if (req.headers.host) { reqInfo.host = req.headers.host; }
+
     if (opts.allHeaders) { reqInfo.headers = req.headers; }
 
     if (req.ip) {

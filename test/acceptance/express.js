@@ -143,6 +143,7 @@ describe('express()', () => {
     assert.equal(body.hits.hits[0]._source.protocol, 'http');
     assert.equal(typeof parseFloat(body.hits.hits[0]._source.duration), 'number');
     assert.equal(body.hits.hits[0]._source.ip, '127.0.0.1');
+    assert.equal(body.hits.hits[0]._source.host, '127.0.0.1:7777');
     assert.equal(body.hits.hits[0]._source.agent, agent);
     assert.equal(body.hits.hits[0]._source.originalUrl, pathBase);
     // // Elastic returns it as an string.
