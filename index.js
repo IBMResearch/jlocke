@@ -259,9 +259,11 @@ module.exports.express = (opts = {}) => {
             .then((hideFun) => {
               dbg('To hide (fun):', { hideFun });
 
-              dbg('Deleting body');
-              // TODO: Try to avoid this delete to improve performance.
-              delete reqInfo.body; // "Hide full body"
+              if (hideFun) {
+                dbg('Deleting body');
+                // TODO: Try to avoid this delete to improve performance.
+                delete reqInfo.body; // "Hide full body"
+              }
               sendToDb(indexRequests, typeRequests, reqInfo);
             })
             .catch((err) => {
