@@ -31,8 +31,7 @@ const url = 'localhost:9200';
 const index = Math.random().toString(36).substr(2, 10);
 const indexFull = `${index}-${today()}`;
 const indexErrors = `${index}-error`;
-const type = 'test';
-const typeErrors = 'testErr';
+const appName = 'testName';
 const excludePath = 'login';
 const excludeField = 'password';
 const testUser = 'ola';
@@ -41,7 +40,7 @@ const uriServer = `http://127.0.0.1:${port}`;
 const pathBase = '/api';
 const pathLogin = `${pathBase}/login`;
 const pathHidden = '/hidden';
-const searchOpts = { index: indexFull, type, sort: ['timestamp:desc'] };
+const searchOpts = { index: indexFull, type: 'request', sort: ['timestamp:desc'] };
 let defineFun = false;
 let server;
 let reqLogin;
@@ -61,10 +60,9 @@ describe('express()', () => {
   beforeEach((done) => {
     jLocke.init(url, {
       // trace: true,
+      app: appName,
       indexRequests: index,
-      typeRequests: type,
       indexErrors,
-      typeErrors,
     })
       .then(() => {
         const app = express();
@@ -135,9 +133,9 @@ describe('express()', () => {
     assert.equal(body.hits.total, 1);
     /* eslint-disable no-underscore-dangle */
     assert.equal(body.hits.hits[0]._index, indexFull);
-    assert.equal(body.hits.hits[0]._type, type);
     assert.equal(typeof body.hits.hits[0]._id, 'string');
     assert.equal(body.hits.hits[0]._id.length, 20);
+    assert.equal(body.hits.hits[0]._source.app, appName);
     assert.equal(body.hits.hits[0]._source.path, pathBase);
     assert.equal(body.hits.hits[0]._source.method, 'GET');
     assert.equal(body.hits.hits[0]._source.protocol, 'http');

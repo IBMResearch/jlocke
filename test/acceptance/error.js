@@ -26,8 +26,7 @@ const url = 'localhost:9200';
 const index = Math.random().toString(36).substr(2, 10);
 const indexErrors = `${index}-error`;
 const indexErrorsFull = `${indexErrors}-${today()}`;
-const type = 'test';
-const typeErrors = 'testErr';
+const appName = 'testName';
 
 
 dbg(`Starting, initing the DB connection: ${url}`);
@@ -41,10 +40,9 @@ describe('error()', () => {
   before(async () => {
     await jLocke.init(url, {
       // trace: true,
+      app: appName,
       indexRequests: index,
-      typeRequests: type,
       indexErrors,
-      typeErrors,
     });
 
     dbg('jLocke started, waiting a bit for index creation to finish');
@@ -65,7 +63,7 @@ describe('error()', () => {
     sleep(10000);
 
     dbg('Checking the error saved stuff ...');
-    const result = await db.search({ index: indexErrorsFull, type: typeErrors });
+    const result = await db.search({ index: indexErrorsFull, type: 'error' });
     dbg('Response got:', result);
 
     // Only cheking some of them to KISS.
@@ -73,9 +71,9 @@ describe('error()', () => {
     assert.equal(result.hits.total, 1);
     /* eslint-disable no-underscore-dangle */
     assert.equal(result.hits.hits[0]._index, indexErrorsFull);
-    assert.equal(result.hits.hits[0]._type, typeErrors);
     assert.equal(typeof result.hits.hits[0]._id, 'string');
     assert.equal(result.hits.hits[0]._id.length, 20);
+    assert.equal(result.hits.hits[0]._source.app, appName);
     assert.equal(result.hits.hits[0]._source.message, errMsgCustom);
     assert.equal(result.hits.hits[0]._source.errorMessage, errMsg);
     assert.equal(typeof result.hits.hits[0]._source.errorStack, 'string');

@@ -27,9 +27,10 @@ let indexReady = false;
 let db;
 // We can't do it for each day in run time due to performance reasons.
 let indexRequests;
-let typeRequests;
 let indexErrors;
-let typeErrors;
+const typeRequests = 'request';
+const typeErrors = 'error';
+let app = 'app';
 
 
 function sendToDb(index, type, body) {
@@ -49,6 +50,17 @@ module.exports.init = async (uri, opts = {}) => {
   const optsElastic = { host: uri };
   if (opts.trace) { optsElastic.log = 'trace'; }
 
+  if (opts.app) {
+    dbg(`"app" options passed: ${opts.app}`);
+
+    if (typeof opts.app !== 'string') {
+      throw new Error('Bad app name');
+    }
+
+    // eslint-disable-next-line prefer-destructuring
+    app = opts.app;
+  }
+
   try {
     db = new elastic.Client(optsElastic);
   } catch (err) {
@@ -59,18 +71,16 @@ module.exports.init = async (uri, opts = {}) => {
   // We can't do it for each day in run time due to performance reasons.
   const todayStr = today();
   indexRequests = `${opts.indexRequests || defaults.indexes.api.name}-${todayStr}`;
-  typeRequests = opts.typeRequests || defaults.indexes.api.type;
   indexErrors = `${opts.indexErrors || defaults.indexes.error.name}-${todayStr}`;
-  typeErrors = opts.typeErrors || defaults.indexes.error.type;
 
   dbg('Creating proper indexes', {
-    indexRequests, typeRequests, indexErrors, typeErrors,
+    indexRequests, indexErrors,
   });
   // We don't drop if it already exists, ie: same day deploy.
   try {
     await Promise.all([
-      ensureIndex(db, indexRequests, typeRequests, 'request'),
-      ensureIndex(db, indexErrors, typeErrors, 'error'),
+      ensureIndex(db, indexRequests, typeRequests),
+      ensureIndex(db, indexErrors, typeErrors),
     ]);
   } catch (err) {
     throw Error(`Creating the indexes: ${err.message}`);
@@ -96,6 +106,7 @@ module.exports.error = async (message, error, opts = {}) => {
   }
 
   const errorInfo = {
+    app,
     message,
     timestamp: new Date(),
     errorMessage: error.message,
@@ -177,6 +188,7 @@ module.exports.express = (opts = {}) => {
     }
 
     const reqInfo = {
+      app,
       path: req.path,
       method: req.method,
       protocol: req.protocol,
@@ -293,6 +305,7 @@ module.exports.express = (opts = {}) => {
 
             delete reqInfo.body[opts.hideBody.field];
           }
+
           sendToDb(indexRequests, typeRequests, reqInfo);
         }
       }

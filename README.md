@@ -37,9 +37,8 @@ The middleware setup expects:
 - `opts` (object) - DB optional values:
   - `trace` (boolean) - To enable Elastic tracing. (default: false)
   - `indexRequests` (string) - Name of the Elastic index to store the requests info. (default: "api-requests-MM-DD-YYY")
-  - `typeRequests` (string) - Elastic type of the element to store the requests info. (default: "requests")
   - `indexErrors` (string) - Name of the Elastic index to store the errors info. (default: "api-errors-MM-DD-YYY")
-  - `typeErrors` (string) - Elastic type of the element to store the errors info. (default: "errors")
+  - `app` (string) - App name to monitor, needed to classify by app in Elastic. A field with "keyword" type will be added in all errors and express requests. (default: "app")
 
 ### async `jLocke.error(message, error, opts)` -> Promise
 
