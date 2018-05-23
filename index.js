@@ -21,7 +21,6 @@ const defaults = require('./defaults');
 const ensureIndex = require('./lib/ensureIndex');
 const today = require('./lib/today');
 
-
 const errInit = 'URI not found, call "init" before';
 let indexReady = false;
 let db;
@@ -32,23 +31,28 @@ const typeRequests = 'request';
 const typeErrors = 'error';
 let app = 'app';
 
-
 function sendToDb(index, type, body) {
   dbg('Inserting found request data in the DB', { index, type, body });
   // TODO: Add pipelining
-  db.index({ index, type, body })
+  db
+    .index({ index, type, body })
     .then(() => dbg('New request info correctly inserted'))
-    .catch((err) => { throw Error(`Adding the requests info: ${err.message}`); });
+    .catch(err => {
+      throw Error(`Adding the requests info: ${err.message}`);
+    });
 }
 
-
 module.exports.init = async (uri, opts = {}) => {
-  if (!uri) { throw new Error(errInit); }
+  if (!uri) {
+    throw new Error(errInit);
+  }
 
   dbg(`Connecting to DB: ${uri}`);
 
   const optsElastic = { host: uri };
-  if (opts.trace) { optsElastic.log = 'trace'; }
+  if (opts.trace) {
+    optsElastic.log = 'trace';
+  }
 
   if (opts.app) {
     dbg(`"app" options passed: ${opts.app}`);
@@ -70,11 +74,14 @@ module.exports.init = async (uri, opts = {}) => {
   // Each new deploy indexes are created including the date in the name.
   // We can't do it for each day in run time due to performance reasons.
   const todayStr = today();
-  indexRequests = `${opts.indexRequests || defaults.indexes.api.name}-${todayStr}`;
-  indexErrors = `${opts.indexErrors || defaults.indexes.error.name}-${todayStr}`;
+  indexRequests = `${opts.indexRequests ||
+    defaults.indexes.api.name}-${todayStr}`;
+  indexErrors = `${opts.indexErrors ||
+    defaults.indexes.error.name}-${todayStr}`;
 
   dbg('Creating proper indexes', {
-    indexRequests, indexErrors,
+    indexRequests,
+    indexErrors,
   });
   // We don't drop if it already exists, ie: same day deploy.
   try {
@@ -90,10 +97,13 @@ module.exports.init = async (uri, opts = {}) => {
   indexReady = true;
 };
 
-
 module.exports.error = async (message, error, opts = {}) => {
-  if (!message) { throw new Error('A custom message is mandatory'); }
-  if (!error) { throw new Error('An error is mandatory'); }
+  if (!message) {
+    throw new Error('A custom message is mandatory');
+  }
+  if (!error) {
+    throw new Error('An error is mandatory');
+  }
 
   dbg('New error', { message, opts });
 
@@ -121,7 +131,6 @@ module.exports.error = async (message, error, opts = {}) => {
   await db.index({ index: indexErrors, type: typeErrors, body: errorInfo });
 };
 
-
 // eslint-disable-next-line arrow-body-style
 module.exports.express = (opts = {}) => {
   dbg('Checking the passed options');
@@ -135,12 +144,16 @@ module.exports.express = (opts = {}) => {
     // Array or string supported.
     // eslint-disable-next-line prefer-destructuring
     only = opts.only;
-    if (typeof only === 'string') { only = [only]; }
+    if (typeof only === 'string') {
+      only = [only];
+    }
   }
 
   // To keep backward compatibility.
-  // eslint-disable-next-line no-param-reassign
-  if (!opts.hideBody && opts.hide) { opts.hideBody = opts.hide; }
+  if (!opts.hideBody && opts.hide) {
+    // eslint-disable-next-line no-param-reassign
+    opts.hideBody = opts.hide;
+  }
 
   if (opts.hideBody) {
     if (typeof opts.hideBody !== 'object') {
@@ -157,13 +170,10 @@ module.exports.express = (opts = {}) => {
 
   // TODO: Add also checks for subfields.
 
-
   return (req, res, next) => {
     dbg('New request');
 
-
     next();
-
 
     if (!indexReady) {
       // eslint-disable-next-line no-console
@@ -173,7 +183,7 @@ module.exports.express = (opts = {}) => {
 
     // "originalUrl" is unique always present (vs "path" and "baseUrl").
     if (only) {
-      const matchAny = !lodash.some(only, (itemOnly) => {
+      const matchAny = !lodash.some(only, itemOnly => {
         if (only && req.originalUrl.indexOf(itemOnly) === -1) {
           return true;
         }
@@ -182,9 +192,15 @@ module.exports.express = (opts = {}) => {
       });
 
       // We don't want to debug the originalUrl because it includes the user token.
-      dbg('Request checked (hidden path)', { path: req.path, baseUrl: req.baseUrl, matchAny });
+      dbg('Request checked (hidden path)', {
+        path: req.path,
+        baseUrl: req.baseUrl,
+        matchAny,
+      });
 
-      if (!matchAny) { return; }
+      if (!matchAny) {
+        return;
+      }
     }
 
     const reqInfo = {
@@ -196,12 +212,18 @@ module.exports.express = (opts = {}) => {
       timestamp: new Date(),
     };
 
-    if (req.headers['user-agent']) { reqInfo.agent = req.headers['user-agent']; }
+    if (req.headers['user-agent']) {
+      reqInfo.agent = req.headers['user-agent'];
+    }
 
     // TODO: If not optional add at the object creation.
-    if (req.headers.host) { reqInfo.host = req.headers.host; }
+    if (req.headers.host) {
+      reqInfo.host = req.headers.host;
+    }
 
-    if (opts.allHeaders) { reqInfo.headers = req.headers; }
+    if (opts.allHeaders) {
+      reqInfo.headers = req.headers;
+    }
 
     if (req.ip) {
       // TODO: Elastic only support v4 IP addresses, so we need to convert it.
@@ -227,20 +249,22 @@ module.exports.express = (opts = {}) => {
       dbg(`UserId passed: ${req.userId}`);
     }
 
-
     // We need to wait for the route to finish to get the correct statusCode and duration.
     // https://nodejs.org/api/http.html#http_event_finish
     res.on('finish', () => {
       dbg('Request ended');
 
       const duration = res.getHeader('x-response-time');
-      if (duration) { reqInfo.duration = duration; }
+      if (duration) {
+        reqInfo.duration = duration;
+      }
 
       reqInfo.responseCode = res.statusCode;
 
       // Adding the body.
       if (
-        (!req.body || Object.keys(req.body).length < 1) || // with non empty body
+        !req.body ||
+        Object.keys(req.body).length < 1 || // with non empty body
         !opts.hideBody
       ) {
         dbg('No "hide" or no body, sending ...');
@@ -259,16 +283,19 @@ module.exports.express = (opts = {}) => {
         // No       Yes      Yes -> Hide field for all paths if fun
         // Yes      Yes      No  -> Hide field for this path
         // Yes      Yes      Yes -> Hide field for this path if fun
-        const hidePath = (opts.hideBody.path && reqInfo.path.indexOf(opts.hideBody.path) !== -1);
+        const hidePath =
+          opts.hideBody.path && reqInfo.path.indexOf(opts.hideBody.path) !== -1;
 
         if (opts.hideBody.fun) {
           let condPromise = opts.hideBody.fun(req);
           dbg('To hide (path):', { hidePath });
 
-          if (!isPromise(condPromise)) { condPromise = Promise.resolve(condPromise); }
+          if (!isPromise(condPromise)) {
+            condPromise = Promise.resolve(condPromise);
+          }
 
           condPromise
-            .then((hideFun) => {
+            .then(hideFun => {
               dbg('To hide (fun):', { hideFun });
 
               if (hideFun) {
@@ -278,10 +305,13 @@ module.exports.express = (opts = {}) => {
               }
               sendToDb(indexRequests, typeRequests, reqInfo);
             })
-            .catch((err) => {
+            .catch(err => {
               // eslint-disable-next-line no-console
-              console.error('Running the "hide.fun" promise, not storing' +
-                            'the data due to privacy reasons', err);
+              console.error(
+                'Running the "hide.fun" promise, not storing' +
+                  'the data due to privacy reasons',
+                err,
+              );
             });
         } else if (
           !opts.hideBody.field && // "hide.field" not present
@@ -294,7 +324,8 @@ module.exports.express = (opts = {}) => {
           sendToDb(indexRequests, typeRequests, reqInfo);
         } else {
           dbg('Checking if we need to delete any field');
-          const hideField = (opts.hideBody.field && reqInfo.body[opts.hideBody.field]);
+          const hideField =
+            opts.hideBody.field && reqInfo.body[opts.hideBody.field];
 
           // Dropping specific fields.
           if (

@@ -14,7 +14,6 @@ const assert = require('assert');
 // const dbg = require('debug')('jlocke:test:unit');
 const today = require('../../lib/today');
 
-
 describe('Unit', () => {
   it('today() should return a proper date', async () => {
     const res = await today();
