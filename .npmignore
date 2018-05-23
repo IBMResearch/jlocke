@@ -21,10 +21,12 @@ npm-debug.log
 
 test
 .gitignore
-.eslintrc
+.eslintrc.json
+.prettierrc.json
 .editorconfig
 .vscode
 .github
 .travis.yml
 kibana
-
+CHANGELOG.md
+CODE_OF_CONDUCT.md
