@@ -3,16 +3,11 @@
   "description": "Express.js analytics for friends.",
   "version": "0.1.1",
   "author": {
-    "name": "IBM Research - Science & Solutions team",
-    "email": "isf@zurich.ibm.com"
+    "name": "IBM Research - ACQX Team",
+    "email": "ismael.faro1@ibm.com"
   },
-  "contributors": [
-    "https://github.com/IBMResearch/jlocke/graphs/contributors"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/IBMResearch/jlocke/jlocke.git"
-  },
+  "license": "Apache-2.0",
+  "repository": "IBMResearch/jlocke",
   "keywords": [
     "monitoring",
     "metrics",
@@ -39,9 +34,7 @@
     "format": "prettier --write '**/*.js'",
     "precommit": "pretty-quick --staged",
     "dep-ok": "npm-check",
-    "dep-sec": "nsp check",
-    "dep-old": "ncu",
-    "pretest": "npm run lint && npm run dep-ok && npm run dep-sec"
+    "pretest": "npm run lint && npm run dep-ok"
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -51,26 +44,23 @@
     "lodash": "^4.17.5"
   },
   "devDependencies": {
-    "body-parser": "^1.15.2",
-    "eslint": "^4.18.1",
+    "body-parser": "^1.18.2",
+    "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-json": "^1.2.0",
-    "express": "^4.14.0",
+    "express": "^4.16.0",
     "husky": "^0.14.3",
-    "mocha": "^5.0.1",
-    "npm-check-updates": "^2.8.0",
+    "mocha": "^5.2.0",
     "npm-check": "github:tomfun/npm-check#feature/exclude-folders-from-scan",
-    "nsp": "^3.2.1",
     "prettier": "1.12.1",
-    "pretty-quick": "^1.5.1",
+    "pretty-quick": "^1.6.0",
+    "request": "^2.87.0",
     "request-promise-native": "^1.0.5",
-    "request": "^2.83.0",
     "response-time": "^2.3.2",
     "system-sleep": "^1.3.6"
   },
   "engines": {
     "node": ">=8.0"
-  },
-  "license": "Apache-2.0"
+  }
 }
