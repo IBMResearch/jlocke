@@ -1,7 +1,7 @@
 {
   "name": "jlocke",
   "description": "Express.js analytics for friends.",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "author": {
     "name": "IBM Research - ACQX Team",
     "email": "ismael.faro1@ibm.com"
