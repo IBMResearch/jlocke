@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
 - More not needed files ignored in the npm package.
 
 ## [1.0.0] - 2018-05-23
@@ -17,8 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.1.0] - 2018-05-23
 ### Changed
-- Updated the library "elasticsearch" to avoid insecure dependencies.
 - Good practices in the codebase, to respect new development guide.
+### Security
+- Updated the library "elasticsearch" to avoid insecure dependencies.
 
 [Unreleased]: https://github.com/IBMResearch/jlocke/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/IBMResearch/jlocke/compare/0.1.0...v1.0.0
