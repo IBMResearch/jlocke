@@ -23,18 +23,18 @@ const today = require('../../lib/today');
 
 const url = 'localhost:9200';
 // Random to avoid confusion running the tests locally.
-const index = Math.random().toString(36).substr(2, 10);
+const index = Math.random()
+  .toString(36)
+  .substr(2, 10);
 const indexErrors = `${index}-error`;
 const indexErrorsFull = `${indexErrors}-${today()}`;
 const appName = 'testName';
-
 
 dbg(`Starting, initing the DB connection: ${url}`);
 const db = new elastic.Client({
   host: url,
   // log: 'trace',
 });
-
 
 describe('error()', () => {
   before(async () => {
@@ -48,7 +48,6 @@ describe('error()', () => {
     dbg('jLocke started, waiting a bit for index creation to finish');
     sleep(10000);
   });
-
 
   it('should save the error', async () => {
     dbg('Making the error request ...');

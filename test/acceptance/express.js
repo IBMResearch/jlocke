@@ -28,7 +28,9 @@ const today = require('../../lib/today');
 const port = 7777;
 const url = 'localhost:9200';
 // Random to avoid confusion running the tests locally.
-const index = Math.random().toString(36).substr(2, 10);
+const index = Math.random()
+  .toString(36)
+  .substr(2, 10);
 const indexFull = `${index}-${today()}`;
 const indexErrors = `${index}-error`;
 const appName = 'testName';
@@ -40,11 +42,14 @@ const uriServer = `http://127.0.0.1:${port}`;
 const pathBase = '/api';
 const pathLogin = `${pathBase}/login`;
 const pathHidden = '/hidden';
-const searchOpts = { index: indexFull, type: 'request', sort: ['timestamp:desc'] };
+const searchOpts = {
+  index: indexFull,
+  type: 'request',
+  sort: ['timestamp:desc'],
+};
 let defineFun = false;
 let server;
 let reqLogin;
-
 
 dbg(`Starting, initing the DB connection: ${url}`);
 const db = new elastic.Client({
@@ -52,18 +57,18 @@ const db = new elastic.Client({
   // log: 'trace',
 });
 
-
 describe('express()', () => {
   // TODO: Not working.
   // before(async () => {
   // beforeEach(async () => {
-  beforeEach((done) => {
-    jLocke.init(url, {
-      // trace: true,
-      app: appName,
-      indexRequests: index,
-      indexErrors,
-    })
+  beforeEach(done => {
+    jLocke
+      .init(url, {
+        // trace: true,
+        app: appName,
+        indexRequests: index,
+        indexErrors,
+      })
       .then(() => {
         const app = express();
 
@@ -83,12 +88,16 @@ describe('express()', () => {
         };
         // TODO: Add a test for this.
         // if (defineFun) { opts.hideBody.fun = () => true; }
-        if (defineFun) { opts.hideBody.fun = () => Promise.resolve(true); }
+        if (defineFun) {
+          opts.hideBody.fun = () => Promise.resolve(true);
+        }
 
         app.use(jLocke.express(opts));
 
         app.get(pathBase, (req, res) => res.send('Hello World!'));
-        app.post(pathLogin, (req, res) => res.send({ username: 'test', token: 'aaa' }));
+        app.post(pathLogin, (req, res) =>
+          res.send({ username: 'test', token: 'aaa' }),
+        );
         app.get(pathHidden, (req, res) => res.send('Hello hidden!'));
 
         // Lets give a time to end the index creation.
@@ -105,7 +114,6 @@ describe('express()', () => {
         });
       });
   });
-
 
   it('should save all data for non hidden fields', async () => {
     dbg('Making the HTTP request ...');
@@ -139,7 +147,10 @@ describe('express()', () => {
     assert.equal(body.hits.hits[0]._source.path, pathBase);
     assert.equal(body.hits.hits[0]._source.method, 'GET');
     assert.equal(body.hits.hits[0]._source.protocol, 'http');
-    assert.equal(typeof parseFloat(body.hits.hits[0]._source.duration), 'number');
+    assert.equal(
+      typeof parseFloat(body.hits.hits[0]._source.duration),
+      'number',
+    );
     assert.equal(body.hits.hits[0]._source.ip, '127.0.0.1');
     assert.equal(body.hits.hits[0]._source.host, '127.0.0.1:7777');
     assert.equal(body.hits.hits[0]._source.agent, agent);
@@ -152,7 +163,6 @@ describe('express()', () => {
 
     server.close();
   });
-
 
   it('should only inspect not hidden subpaths (if "path")', async () => {
     dbg('Making the HTTP request ...');
@@ -171,7 +181,6 @@ describe('express()', () => {
 
     server.close();
   });
-
 
   it('should hide desired fields for POSTs (if "hide")', async () => {
     dbg('Making the HTTP request ...');
@@ -209,7 +218,6 @@ describe('express()', () => {
     // Ready for the next test.
     defineFun = true;
   });
-
 
   it('should only have "fun" into account (if defined)', async () => {
     dbg('Making the HTTP request ...');
