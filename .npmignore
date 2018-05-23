@@ -28,5 +28,4 @@ test
 .github
 .travis.yml
 kibana
-CHANGELOG.md
 CODE_OF_CONDUCT.md
