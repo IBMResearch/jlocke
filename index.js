@@ -1,11 +1,11 @@
-/*
-  Copyright (c) 2016 IBM Research Emergent Solutions
-                     Jesús Pérez <jesusprubio@gmail.com>
-                     Paco Martín <fmartinfdez@gmail.com>
-
-  This code may only be used under the MIT style license found at
-  https://ibmresearch.github.io/LICENSE.txt
-*/
+/**
+ * @license
+ *
+ * Copyright (c) 2016-present, IBM Research.
+ *
+ * This source code is licensed under the Apache license found in the
+ * LICENSE.txt file in the root directory of this source tree.
+ */
 
 'use strict';
 
