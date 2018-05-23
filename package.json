@@ -1,7 +1,7 @@
 {
   "name": "jlocke",
   "description": "Express.js analytics for friends.",
-  "version": "0.0.29",
+  "version": "0.1.0",
   "author": {
     "name": "IBM Research - Science & Solutions team",
     "email": "isf@zurich.ibm.com"
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "elasticsearch": "^14.1.0",
+    "elasticsearch": "^15.0.0",
     "ipaddr.js": "^1.6.0",
     "is-promise": "^2.1.0",
     "lodash": "^4.17.5"

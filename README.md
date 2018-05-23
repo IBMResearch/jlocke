@@ -78,4 +78,4 @@ In the same wat, to support the `duration` field (ms.) you need to attach the ["
 
 ## Developer guide
 
-:sunglasses: If you want to help please check [this](https://github.com/QISKit/qiskit-sdk-js/blob/master/CONTRIBUTING.md).
+:sunglasses: If you want to help please check [this file](.github/CONTRIBUTING.md).
