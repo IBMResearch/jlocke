@@ -33,8 +33,8 @@
     "lint": "eslint . --ignore-path .gitignore",
     "format": "prettier --write '**/*.js'",
     "precommit": "pretty-quick --staged",
-    "dep-ok": "npm-check",
-    "pretest": "npm run lint && npm run dep-ok"
+    "check-dependencies": "depcheck --ignores='husky'",
+    "pretest": "npm run lint && npm run check-dependencies"
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "body-parser": "^1.18.2",
+    "depcheck": "^0.6.9",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.12.0",
@@ -52,7 +53,6 @@
     "express": "^4.16.0",
     "husky": "^0.14.3",
     "mocha": "^5.2.0",
-    "npm-check": "github:tomfun/npm-check#feature/exclude-folders-from-scan",
     "prettier": "1.12.1",
     "pretty-quick": "^1.6.0",
     "request": "^2.87.0",
