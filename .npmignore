@@ -23,5 +23,8 @@ test
 .gitignore
 .eslintrc
 .editorconfig
+.vscode
+.github
 .travis.yml
-dashboards
+kibana
+
