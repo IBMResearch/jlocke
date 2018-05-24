@@ -11,10 +11,8 @@
 
 const assert = require('assert');
 
-/* eslint-disable import/no-extraneous-dependencies */
 const elastic = require('elasticsearch');
 const sleep = require('system-sleep');
-/* eslint-enable import/no-extraneous-dependencies */
 
 const dbg = require('debug')('jlocke:test:acceptance');
 const jLocke = require('../..');

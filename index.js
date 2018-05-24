@@ -131,7 +131,6 @@ module.exports.error = async (message, error, opts = {}) => {
   await db.index({ index: indexErrors, type: typeErrors, body: errorInfo });
 };
 
-// eslint-disable-next-line arrow-body-style
 module.exports.express = (opts = {}) => {
   dbg('Checking the passed options');
 

@@ -11,14 +11,12 @@
 
 const assert = require('assert');
 
-/* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
 const bodyParser = require('body-parser');
 const elastic = require('elasticsearch');
 const makeReq = require('request-promise-native');
 const sleep = require('system-sleep');
 const responseTime = require('response-time');
-/* eslint-enable import/no-extraneous-dependencies */
 
 const dbg = require('debug')('jlocke:test:acceptance');
 const jLocke = require('../..');
