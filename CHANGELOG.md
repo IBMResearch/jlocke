@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - More not needed files ignored in the npm package.
+### Fixed
+- Changelog reference to the last release.
 
 ## [1.0.0] - 2018-05-23
 ### Added
@@ -22,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Security
 - Updated the library "elasticsearch" to avoid insecure dependencies.
 
-[Unreleased]: https://github.com/IBMResearch/jlocke/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/IBMResearch/jlocke/compare/0.1.0...v1.0.0
+[Unreleased]: https://github.com/IBMResearch/jlocke/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/IBMResearch/jlocke/compare/0.1.1...1.0.0
 [0.1.1]: https://github.com/IBMResearch/jlocke/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/IBMResearch/jlocke/compare/f8089d6fabd61d43b057a31418a0963b40b7a227...0.1.0
