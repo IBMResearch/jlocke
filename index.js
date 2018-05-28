@@ -34,8 +34,7 @@ let app = 'app';
 function sendToDb(index, type, body) {
   dbg('Inserting found request data in the DB', { index, type, body });
   // TODO: Add pipelining
-  db
-    .index({ index, type, body })
+  db.index({ index, type, body })
     .then(() => dbg('New request info correctly inserted'))
     .catch(err => {
       throw Error(`Adding the requests info: ${err.message}`);
