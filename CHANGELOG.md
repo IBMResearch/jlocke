@@ -4,25 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+> **Tags:**
+> - 🎉 Added
+> - ✏️ Changed
+> - ⚠️ Deprecated
+> - ❌ Removed
+> - 🐛 Fixed
+> - 👾 Security
+
 ## [Unreleased]
-### Changed
+### ✏️ Changed
 - More not needed files ignored in the npm package.
-### Fixed
+### 🐛 Fixed
 - Changelog reference to the last release.
 - Changelog to be consistent with the tag naming of the dev guide.
 
 ## [1.0.0] - 2018-05-23
-### Added
+### 🎉 Added
 - First stable version.
 
 ## [0.1.1] - 2018-05-23
-### Removed
+### ❌ Removed
 - Stuff not needed from npm package.
 
 ## [0.1.0] - 2018-05-23
-### Changed
+### ✏️ Changed
 - Good practices in the codebase, to respect new development guide.
-### Security
+### 👾 Security
 - Updated the library "elasticsearch" to avoid insecure dependencies.
 
 [Unreleased]: https://github.com/IBMResearch/jlocke/compare/v1.0.0...HEAD
