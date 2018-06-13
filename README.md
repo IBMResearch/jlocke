@@ -1,6 +1,8 @@
 # jLocke
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Continuos integration](https://travis-ci.org/IBMResearch/jlocke.svg?branch=master)](https://travis-ci.org/IBMResearch/jlocke)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 [Express.js](http://expressjs.com) analytics for friends, based on [Elastic](https://www.elastic.co) and [Kibana](https://www.elastic.co/products/kibana). The idea is to monitor the API since the first moment with a quick setup, instead of having to define anything in advance (ie: traits).
 
